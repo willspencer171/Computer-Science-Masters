@@ -1,0 +1,30 @@
+-- In this file you can write the OCL expressions for the constriants on the Campaign class diagram.
+context Campaign
+    inv: self.estimatedCost = self.adverts.estimatedCost->sum() * (1 + self.ohRate)
+
+context Campaign::upDateEstimatedCost()
+    post:
+        if self.estimatedCost > self.estimatedCost@pre and
+            self.estimatedCost > budget and
+            self.estimatedCost <= budget * 1.02 then
+            self.clientLetterRequired = 'true'
+        else
+        	self.clientLetterRequired = 'false'
+        endif
+
+context Campaign::checkCampaignBudget():Real
+    pre: 
+        self <> 'null'
+    post:
+        result = self.originalBudget - self.estimatedCost and
+        self.estimatedCost = self.adverts.estimated Cost->sum()
+
+context CreativeStaff::changeGrade(grade:Grade, gradeChangeDate:Date)
+pre:
+	grade.oclIsTypeOf(Grade)
+	gradeChangeDate >= today
+post:
+	self.staffGrade->notEmpty() and
+	self.staffGrade.previous->notEmpty() and
+	self.staffGrade.getStartDate() = gradeChangeDate and
+	self.staffGrade.previous.getFinishDate() = gradeChangeDate.minus(1)

@@ -1,0 +1,13 @@
+context Crate
+    inv: self.bottles->size() <= self.capacity
+        self.bottles->forAll(b : Bottle | b.getDiameter <= self.maxDiameter) = 'true'
+        self.totalWeight() <= self.maxWeight
+        self.totalWeight() = self.bottles.totalWeight()->sum() + self.weight
+
+context Crate::addBottle(b: Bottle)
+    pre:
+        maxWeight - totalWeight >= b.totalWeight()
+        capacity > bottles->size()
+        bottles->excludes(b)
+    post:
+        bottles->includes(b)

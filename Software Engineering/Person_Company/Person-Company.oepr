@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Project name="Person-Company">
+    <Directory kind="0" name="Constraints">
+        <File AbsolutePath="//tsclient/C/Users/wills/Documents/University of York/Computer Science Masters/Software Engineering/Person_Company/Person-Company.bcr" RelativePath="Person-Company.bcr" kind="1" selected="true"/>
+    </Directory>
+    <Directory kind="0" name="Models">
+        <Model AbsolutePath="//tsclient/C/Users/wills/Documents/University of York/Computer Science Masters/Software Engineering/Person_Company/Person-Company.xml.zip" RelativePath="Person-Company.xml.zip" kind="4" selected="true"/>
+    </Directory>
+</Project>

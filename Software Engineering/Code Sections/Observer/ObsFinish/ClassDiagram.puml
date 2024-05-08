@@ -1,0 +1,51 @@
+@startuml
+
+skinparam linetype ortho
+
+class Driver1 {
+  + main(String[]): void {static}
+}
+interface Observer << interface >> {
+  + update(): void
+}
+class PDemoSwing {
+  # panel1: JPanel
+  # qbutton: JButton
+  # panel2: JPanel
+  # al: JLabel
+  # fnl: JLabel
+  # panel3: JPanel
+  # lb: JLabel
+  # menubar1: JMenuBar
+  # snl: JLabel
+  # menu1: JMenu
+  # aperson: Person
+  # about: JMenuItem
+  + actionPerformed(ActionEvent): void
+  + update(): void
+}
+class Person {
+  - surname: String
+  - forename: String
+  - age: int
+  + setForename(String): void
+  + setAge(int): void
+  + increaseAge(int): void
+  + getForename(): String
+  + getAge(): int
+  + setSurname(String): void
+  + getSurname(): String
+}
+abstract Subject {
+  ~ numObs: int
+  - observers: Observer[]
+  + notifyObs(): void
+  + attach(Observer): void
+}
+
+PDemoSwing -> Person
+PDemoSwing  -[#008200,dashed]-^  Observer
+Person      -[#000082,plain]-^  Subject
+Subject -> Observer
+
+@enduml

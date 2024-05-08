@@ -1,0 +1,11 @@
+-- In this file you can write the OCL expressions for the constriants on the Person-Company class diagram.
+context Person
+    inv: self.gender = Gender::male or self.gender = Gender::female
+    inv: self.savings >= 500
+    inv: self.husband->notEmpty() implies self.husband.gender = Gender::male
+
+context Company
+    inv: self.CEO->size() <= 1
+	inv: self.employee->select(self.employee.getAge < 60)->size() < 100
+
+      

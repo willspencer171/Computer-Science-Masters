@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Project name="Crate">
+    <Directory kind="0" name="Constraints">
+        <File AbsolutePath="//tsclient/C/Users/wills/Documents/University of York/Computer Science Masters/Software Engineering/Crate/CrateModelLevel.bcr" RelativePath="CrateModelLevel.bcr" kind="1" selected="true"/>
+    </Directory>
+    <Directory kind="0" name="Models">
+        <Model AbsolutePath="//tsclient/C/Users/wills/Documents/University of York/Computer Science Masters/Software Engineering/Crate/CrateModel.xml.zip" RelativePath="CrateModel.xml.zip" kind="4" selected="true"/>
+    </Directory>
+</Project>

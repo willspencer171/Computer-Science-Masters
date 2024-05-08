@@ -1,0 +1,64 @@
+@startuml
+
+top to bottom direction
+skinparam linetype ortho
+
+class Command {
+  - secondWord: String
+  - commandWord: String
+  + getCommandWord(): String
+  + getSecondWord(): String
+  + hasSecondWord(): boolean
+  + isUnknown(): boolean
+}
+class CommandWords {
+  - {static} validCommands: String[]
+  + showAll(): void
+  + isCommand(String): boolean
+}
+class Game {
+  - parser: Parser
+  - currentRoom: Room
+  - processCommand(Command): boolean
+  - printHelp(): void
+  - createRooms(): void
+  + play(): void
+  - printWelcome(): void
+  - goRoom(Command): void
+}
+class MyAdventure {
+  + {static} main(String[]): void
+}
+class Parser {
+  - commands: CommandWords
+  + getCommand(): Command
+  + showCommands(): void
+}
+class Room {
+  - exits: Hashtable
+  - description: String
+  + nextRoom(String): Room
+  + setExits(Room, Room, Room, Room): void
+  + shortDescription(): String
+  + longDescription(): String
+  - exitString(): String
+}
+
+object Legend {
+    - privateAttribute
+    + publicAttribute
+    # protectedAttribute
+    ~ packageAttribute
+    - privateMethod()
+    + publicMethod()
+    # protectedMethod()
+    ~ packageMethod()
+}
+
+Game         "1" --> "1" Parser : "parser  "
+Game         "1   " --> "1 " Room : "  currentRoom"
+MyAdventure   ..>  Game : "create"
+Parser        ..->  Command : "create"
+Parser       "1   " --> "1" CommandWords : commands
+
+@enduml

@@ -4,7 +4,7 @@ class UDPServer {
     {
         DatagramSocket serverSocket = new DatagramSocket(9876);
         byte[] receiveData = new byte[1024];
-        byte[] sendData = new byte[1024];
+        byte[] sendData;
         while(true)
         {
             DatagramPacket receivePacket = new DatagramPacket(receiveData,

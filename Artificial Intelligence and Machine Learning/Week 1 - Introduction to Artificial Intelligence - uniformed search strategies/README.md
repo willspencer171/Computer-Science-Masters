@@ -107,3 +107,13 @@ This approach includes and extends the rational thinking approach - after all, y
 A rational agent also has components of the [Turing Test](#acting-humanly-the-turing-test-approach). Knowledge representation and automated reasoning allow a computer to make use of the information it has stored. A rational agent also needs to make use of natural language processing in order to get by in a complex society that is driven by language. It also needs to learn in order to generate *effective* behaviour.
 
 Rational action has two main advantages over the other approaches. It is more generalised than the laws of thought approach - it extends these principles into action, and also goes beyond simple inference. It is also easier to measure than the Turing Test approach - rationality is a mathematically defined principle that is generalisable to extend past the realm of human thinking. Humans are adapted to thrive in specific environments (like the wild and, now, the sofa), while a machine can be taught to behave rationally in any environment.
+
+### Which Paradigm?
+
+The all-important question that we need to answer from this is: how do we want to use AI? Should AI be as close an imitation to human activity and thinking as possible? Or should all AI be rational, emotionless thinkers of only logic?
+
+It depends on the situation. Of course. You may want a human-like AI in the home to respond to your questions and produce actions that are rudimentally just like your own. You'd also want an AI that can reliably solve the trolley problem like a human would. In driverless cars, sometimes the best decision (as infrequent as it may be) is to hit a tree and more likely kill a driver than to hit a child and kill the child (also incurring penalties like jail time and fines).
+
+On the other hand, the most rational AI would be able to provide step by step plans on how to survive in the wild, or how to model any creature's best survival tactics in a harsh environment. The options are limitless if we generalise past the realms of human imitation.
+
+## The State of the Art in AI

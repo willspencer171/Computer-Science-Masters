@@ -207,3 +207,125 @@ Here's a list of AI things we do now:
   - Check out Boston Dynamics, they're cool for this sort of stuff.
 - Machine Language Translation
   - Yes, technically Google Translate is an application of AI!
+
+## AI Search Algorithms
+
+We're going to talk about one specific kind of goal-based agents: **problem-solving agents**
+
+These are inherently different from **reflex agents** described in chapter 2 (but not here), which base their actions on a direct mapping of states to actions. Goal-based agents consider the future and the consequences of each of their actions to determine how desirable a decision is.
+
+Problem-solving agents use atomic representations to model the world around them - states are available to the agent as a whole, with any underlying concepts or details abstracted away. Think, for example, we as humans think about a pen, a desk, or a megaceros as objects - as a whole. We don't, however, think about them as a collection of fundamental physical particles described purely mathematically. These objects are our **atomic representations**.
+
+### The Scenario
+
+> A holiday-maker is chilling in Arad, Romania. They have a non-refundable flight booked tomorrow morning that leaves from Bucharest, a city they are not in at the moment. Obviously. This holiday-maker (agent) needs to make their way to Bucharest by 9:00 tomorrow. Best of luck, Agent!
+
+### Problem-Solving Agents
+
+What are **goals**? Well, aside from the things I make for myself and rarely achieve, they can be considered a *set of **world states***. In a very simple situation, let's say you want to get from Arad to point Bucharest. If getting an agent to Bucharest is the goal, we can say that the coordinates of the agent must be equal to the coordinates of Bucharest. That is the goal. The set of world states is $$X_{Agent} = X_{Goal}\\ Y_{Agent}=Y_{Goal}$$
+
+The first stage of getting to a goal is **goal formulation** In real life, this is also the first step. If you want to reach your goals, you must set out some tangible goals first.
+
+The next stage is **problem formulation**. This is a process  that considers what level of atomicity is required in taking actions, as well as which actions to *consider* to get to the goal. More on this [later]
+
+Our agent would like to get to Bucharest from Arad. There are three major roads leading out of Arad, that lead to Sibiu, Timisoara and Zerind - none of which are Bucharest. As far as the agent is concerned, it's screwed unless it knows its way around Romania. Which it doesn't. The environment is *unknown* (See section 2.3.2 for definitions of task environment properties like this). Unfortunately, the only real course of action is to take a route at random. This situation is covered [later].
+
+Let's assume the poor sod *does* know its way around Romania - it has a map. The purpose of a map is to give an agent an idea of what it can do given different states. Some of these states will include things like outgoing routes for different cities, name of the next city and location of the next city. In general, an agent with several immediate options of unknown value can decide what to do by first examining future actions that eventually lead to states of known value. *It can get from point A to point B via unknown states by using a map to make decisions*.
+
+Aside from **known**, we can say list other properties of this task environment:
+
+- Observable
+  - The state of the task environment is always knowable to the agent
+- Discrete
+  - There are a finite number of decisions to be made at any point
+- Known
+  - A map suffices to bridge the gap between known and unknown
+- Deterministic
+  - Each action has exactly one outcome
+
+> Quickly, I'd like to define a **percept**. This is a thing that an agent has observed - they have perceived it. This is not necessarily the same thing as the state of the environment the agent is in, it depends on how they *perceive* the state.
+
+### Problems
+
+How do we define a problem then? A problem typically consists of 5 components:
+
+1. Initial state of the agent
+    1. For our case, this could be `In(Arad)`
+2. A description of possible actions for the agent
+    1. This is a set of actions like `{Go(Zerind), Go(Sibiu), Go(Timisoara)}`
+3. A description of what each action does - the **transition model**
+    1. Follows the form `Result(state, action) = state`.
+    2. For example, `Result(In(Arad), Go(Zerind)) = In(Zerind)`
+4. The goal test.
+    1. A check to see if the state of the environment meets the conditions of the goal(s)
+    2. In the example, the goal set is the singleton set `{In(Bucharest)}`
+5. A path cost function
+    1. Used to determine the cost of each path, allowing the agent to make numerically 'good' decisions about routes to take.
+
+A path is the line drawn between two points on a graph. A graph? Yes! A graph! The graph in this case is called the **state space**, and it is the collective term for components 1-3 above.
+
+![Map of Romania](romania_map.png)
+
+The above map is not necessarily the state space in graph form, but it is a human-legible representation of the path costs between cities in this portion of Romania.
+
+**Abstraction** is a large part of searching for an acceptable solution to a problem. In this example, the states and actions are abstracted as well as the conditions along the way. For example, the roads may be full of potholes, or there could be a lot of speed cameras, or roadworks ahead (I sure hope it does!); or we could get into infinite details of the actions - 'turn the wheel one degree clockwise' is far too much detail when we just want to get to the next city.
+
+A solution is successfully abstracted if we can expand the abstracted solution into a more detailed solution without requiring any additional states.
+
+#### Further Reading
+
+Take a look at section 3.2 of the core text. There are some interesting **Toy problems** and **real-world problems** there.
+
+## Logic Solvers
+
+These seem really dumb at first. Take for example, Alice and the rain. We know three things: If someone goes out in the rain, they get wet; Alice went outside; it is raining. We can see easily using our vast human capacity for inference that Alice will get wet. We call that commone sense. Computers do not have common sense. They are not *intelligent* (roll credits).
+
+So, how can we develop **reasoning** in computers (technical term for sense, common or otherwise)? The agents from the previous section know things, but very inflexibly - they can learn about the environment by being given information, but they can't *generate* their own information. Enter **Knowledge-Based Agents**
+
+### Knowledge-Based Agents
+
+The central component of a knowledge-based agent is its **Knowledge Base (KB)**. Duh. This is essentially a set of **sentences** written in a **knowledge representation language** (KRL), similar in nomenclature and nature to sentences in natural languages. When a sentence is given without being derived from other sentences, it is called an **axiom** - more or less a fact about the world.
+
+So how do these work?
+
+In principle, a KB agent works with its KB to update itself in response to percepts from its environment. It does this using a `TELL` and `ASK` command. Both operations may involved inference, but when something is `ASK`ed of the KB, the answer should be something that follows from what the KB has already been `TELL`ed (told). Step by step, what happens when the agent is called is:
+
+1. The KB is `TELL`ed what the agent perceives
+2. It `ASK`s the KB what action should be performed next
+    1. This is where most of the reasoning fits in
+3. The agent `TELL`s the KB which action was chosen and performs it.
+
+A very simple pseudocode implementation looks like this:
+
+![KB Agent implementation](kb_agent.png)
+
+A KB agent can be built simply by telling it what it needs to know about its environment and its goals. Two approaches are recognised for building the initial knowledge base: declarative and procedural. In the declarative sense, each sentence is `TELL`ed to the KB one by one, and in the procedural approach, initial sentences are directly encoded into the knowledge bases. Apparently there's lots of fighting between camps but like, they're not that different?
+
+We can also get the agent to learn for itself. Chapter 18 goes into this in more detail apparently. This whole section is about learning so yeah, makes sense. That's actually the next lesson now:
+
+## Machine Learning
+
+Machine learning typically needs little introduction. It's what comes to mind when someone says "AI is going to take your jobs!". It's really capable of so many things and is based on the concept of learning from information to generate new information that can be used to inform itself or us.
+
+Generally, machine learning takes 3 forms:
+
+- Unsupervised Learning
+  - The agent isn't given any explicit feedback, but learns to generate new information about its percepts to achieve a goal.
+  - One well-known method of this is cluster analysis. A big part of unsupervised learning is about patterns
+- Reinforcement Learning
+  - Think Pavlov's dog. You're training a computer with positive and negative feedback based on their actions
+  - The aim of the AI is not to achieve a distinct goal, but to produce actions that lead to high levels of positive association with actions.
+  - Say your aim is to win a match of chess. The AI's aim is to avoid bad moves, and to make good moves
+- Supervised Learning
+  - Here, the agent is given a series of input-output pairs and the aim is to learn a function that maps one to the other consistently.
+  - This function can be a simple association function between variables, or a set of actions based on percepts like whether there is a bus in front of a car.
+
+The lines between these three definitions can be a little blurry at times, which isn't great but allows for some diversity in things like **semi-supervised** learning. If you take pictures of people and ask them their ages, then train an agent on those data, this is supervised learning. If, however, some of the people lied about their ages, it becomes an unsupervised learning problem to ascertain the true ages of these individuals.
+
+> There is a whole load of AI-driven game videos out there. I just watched one that uses reinforcement learning to come up with the best strategies for Monopoly, only to find that it plays about as well as any person does.
+>
+> AI Warehouse does some fun little experiments with an agent call Albert; and some other accounts use reinforcement learning on things like Trackmania and Mario games. Not seeing many examples of games that people use supervised or unsupervised learning for.
+>
+> - Supervised learning is often used to train models on existing gameplay data, mimicking human players.
+> - Unsupervised learning is utilized for clustering, anomaly detection, and strategy discovery without labeled data.
+> - Reinforcement learning dominates in real-time and strategy games where self-play and exploration are key.

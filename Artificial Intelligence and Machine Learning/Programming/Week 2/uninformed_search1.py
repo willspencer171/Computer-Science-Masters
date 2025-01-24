@@ -32,7 +32,7 @@ class StackFrontier(QueueFrontier):
         return self.frontier.pop(-1)
 
 class MazeSolver:
-    def __init__(self, filename):
+    def __init__(self, filename, breadth_first=True):
         
         with open(filename) as file:
             contents = file.read()
@@ -67,6 +67,12 @@ class MazeSolver:
             self.walls.append(row)
         
         self.solution = None
+
+        # Stack - DFS, Queue - BFS
+        if breadth_first:
+            self.frontier = QueueFrontier()
+        else:
+            self.frontier = StackFrontier()
 
     def print_solution(self):
         if isinstance(self.frontier, StackFrontier):
@@ -118,10 +124,8 @@ class MazeSolver:
         # Keep track of explored states
         self.explored_num = 0
 
-        # Initialise starting node and frontier
+        # Initialise starting node and add to frontier
         start = Node(self.start, None, None)
-        # Stack - DFS, Queue - BFS
-        self.frontier = QueueFrontier()
         self.frontier.add(start)
 
         # Initialise empty explored set
@@ -159,6 +163,14 @@ class MazeSolver:
                     self.frontier.add(child)
 
 if __name__ == '__main__':
-    maze = MazeSolver(sys.argv[1])
+    if len(sys.argv) == 3:
+        if sys.argv[2] == 'bfs':
+            bfs = True
+        elif sys.argv[2] == 'dfs':
+            bfs = False
+        else:
+            raise Exception("Options for argv[2] are 'dfs' and 'bfs'")
+        
+    maze = MazeSolver(sys.argv[1], breadth_first=(bfs if 'bfs' in locals() else True))
     maze.solve()
     maze.print_solution()

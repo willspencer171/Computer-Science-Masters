@@ -1,0 +1,9 @@
+State,DirtLeft,DirtRight,VacuumPos,Left,Right,Suck
+1,True,True,L,1,2,3
+2,True,True,R,1,2,6
+3,False,True,L,3,4,3
+4,False,True,R,3,4,8
+5,True,False,L,5,6,7
+6,True,False,R,5,6,6
+7,False,False,L,7,8,7
+8,False,False,R,7,8,8

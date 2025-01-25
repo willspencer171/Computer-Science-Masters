@@ -7,9 +7,8 @@ class VacuumWorldSolver:
             reader = csv.reader(f)
             contents = [row for row in reader]
             headers = contents.pop(0)
-        print(contents)
 
-        self.frontier = QueueFrontier()
+        self.frontier = StackFrontier()
         self.solution = None
 
         self.goals = [7, 8]
@@ -29,6 +28,13 @@ class VacuumWorldSolver:
                 neighbours.append((action, res))
         
         return neighbours
+    
+    def print_solution(self):
+        if not self.solution:
+            raise Exception ("No solution!")
+        
+        print(f"\n\tPath from state 1 to goal state {self.solution[1][-1]}:\n")
+        print(" → ".join([str(val) for val in self.solution[0]]))
 
     def solve(self):
         start = Node('1', None, None)
@@ -50,6 +56,8 @@ class VacuumWorldSolver:
                     actions.append(node.action)
                     cells.append(node.state)
                     node = node.parent
+
+                cells.append(node.state)
                 
                 actions.reverse()
                 cells.reverse()
@@ -66,3 +74,4 @@ class VacuumWorldSolver:
 if __name__ == '__main__':
     world = VacuumWorldSolver('vacuum_world.csv')
     world.solve()
+    world.print_solution()

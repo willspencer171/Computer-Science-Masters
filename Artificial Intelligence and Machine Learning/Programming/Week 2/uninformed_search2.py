@@ -71,7 +71,6 @@ class GridSolver:
             self.congestions.append(congestion)
 
     def expand_node(self, node, gridno):
-        print(f"Unpacking node at {node.state}")
         (x, y) = node.state 
 
         candidates = [
@@ -107,8 +106,6 @@ class GridSolver:
             res = self.depth_limited_search(limit, gridno)
             if res != 'cutoff': 
                 return res
-            else:
-                print(f'cutoff at {limit}')
 
     def recursive_DLS(self, node: Node, limit, gridno, depth=0):
         self.solution_found = False
@@ -148,7 +145,12 @@ class GridSolver:
             return 'failure'
 
 if __name__ =='__main__':
-    grid_solve = GridSolver('Programming/Week 2/grids.txt')
-    actions, states = grid_solve.solve(0)
-    print("Actions:\n\t" + " → ".join(actions))
-    print("States:\n\t" + " → ".join([f"({state[0]}, {state[1]})" for state in states]))
+    grid_solve = GridSolver('grids.txt')
+    for i in range(len(grid_solve.starts)):
+        print(f"\nGrid no {i+1}:\n{'-' * 10}\n")
+        actions, states = grid_solve.solve(i)
+        if actions != 'failure':
+            print("Actions:\n\t" + " → ".join(actions))
+            print("States:\n\t" + " → ".join([f"({state[0]}, {state[1]})" for state in states]))
+        else:
+            print('Failed to find solution')

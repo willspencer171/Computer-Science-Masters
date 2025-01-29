@@ -345,3 +345,38 @@ So, DFS is not optimal, is only reliable in finite state spaces and has an astro
 Space complexity.
 
 BFS has an abhorrent space complexity of $O(b^d)$ (not as bad as DFS time complexity). However, DFS doesn't need anywhere near that much memory. When diving into a subtree, only the path that is being recursed is stored in memory, along with the sibling nodes of the topmost level. This means that the number of nodes generated and stored is at most $O(bm)$, which is *linear*. As such, depth-first tree search is much preferred in the field of AI, since the maximum depth of a tree can get pretty large. Like, imagine a route-finding algorithm that has really fine scale details, down to the square meter. If you want to get from Plymouth to Exeter (73.5km), you'd have a seriously deep tree to navigate that would actually have very few branches. May bring complexity close to $O(m)$ in practice.
+
+Another way to reduce the spatial complexity of DFS is to use **backtracking**, a technique in which only one successor is generated at a time - each partially expanded node remembers which successor to generate next so that we don't expand each node fully. This reduces the spatial complexity to $O(m)$. Nice!
+
+### Depth-Limited Search
+
+I've done the programming tasks for this week and I've realised that I've done the depth-limited search and iterative DLS without writing about them!
+
+Depth-limited search is essentially depth-first search that goes up to a certain limit. The core text doesn't explicitly write any pseudocode for depth-first search, but this solution just keeps track of the depth and terminates early once a depth has been reached. This is to limit the amount of time spent actually searching for a solution. It has the unfortunate diadvantage of introducing incompleteness if the limit is less than the shallowest goal depth ($l<d$).
+
+DLS is a recursive algorithm since it is a generalisation of DFS. We can write it using the following pseudocode:
+
+```pseudo
+function DEPTH-LIMITED-SEARCH(problem, limit) returns a solution, or failure/cutoff
+  return RECURSIVE-DLS(MAKE-NODE(problem.INITIAL-STATE), problem, limit)
+
+function RECURSIVE-DLS(node, problem, limit ) returns a solution, or failure/cutoff
+  if problem.GOAL-TEST(node.STATE) then return SOLUTION(node)
+  else if limit = 0 then return cutoff
+  else
+    cutoff_occurred? ← false
+    for each action in problem.ACTIONS(node.STATE) do
+      child ← CHILD-NODE(problem, node, action)
+      result ← RECURSIVE-DLS(child, problem, limit − 1)
+      if result = cutoff then cutoff_occurred? ← true
+      else if result != failure then return result
+    if cutoff_occurred? then return cutoff else return failure
+```
+
+The problem with this is that, without knowledge of where we might expect a goal to come up, choosing a value for $l$ ahead of time may result in no solution.
+
+#### A Quick Workaround
+
+So, we don't have a good way of estimating the ideal limit for this program that would otherwise find the optimal solution (if the path cost is a nondecreasing function of the depth, of course).
+
+Enter iterative deepening DFS. Honestly, this isn't revolutionary, we just increment the limit $l$ until we find the solution. The memory requirements of this are still $O(bd)$ like that of DFS and the time complexity is that of BFS ($O(b^d)$) which is better than DFS. Essentially, it gets the best of both worlds and is often preferred when the search space is large and the depth of the solution is not known.

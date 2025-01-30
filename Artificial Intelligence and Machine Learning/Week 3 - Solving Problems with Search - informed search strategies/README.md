@@ -35,7 +35,7 @@ Last week we looked at search strategies that just aimed to find the goal state(
 
 We'll be looking mainly at two types of ISS this week - greedy best first search and the A* algorithm.
 
-### Heuristic Functions
+### What are Heuristic Functions?
 
 In informed strategies, a heuristic informs the agent of their distance from a goal. This distance is determined by using a heuristic function $h(n)$ which is a component of the evaluation function $f(n)$ used for evaluating the next node to expand. In the instance of breadth- and depth-first search, $f(n)$ is represented by the order of the removal of elements in the frontier - `pop()` is $f(n)$. Our implementation of `pop()` from our frontier is what determines the nature of the search algorithm.
 
@@ -115,3 +115,55 @@ When the state space has many goal states - particularly near-optimal goals - se
 There can be exponentially many states with $f(n)<C^*$ in a graph, even if error is constantly bounded. In the case of the vacuum problem, modified such that the agent can clean a tile without having to visit it first (i.e. we just suck any location, no left or right actions), there are still $2^N$ states that are all on an optimal solution path, even if the absolute error is bounded to 1.
 
 On top of all this, A* is a recursive algorithm that keeps all generated nodes in memory, leading to more memory issues than time issues for larger problem spaces.
+
+In order to overcome this, there are some algorithms that deal with the space problem without compromising on completeness or optimality.
+
+### Memory-Bounded Heuristic Search
+
+The easiest way to reduce memory requirements is to apply the same concepts as used in iterative deepening - **iterative-deepening A* (IDA*)**. Here, the cutoff is the f-cost, rather than the depth. For each iteration, the cutoff value is the smallest f-cost of any node that exceeded the cutoff on the previous iteration. While this does cut down on the overhead of managing a priority queue, it suffers when dealing with float values (real-value costs).
+
+Other solutions include **recursive best-first search (RBFS)** and **memory-bounded A\* (MA\*)**
+
+#### Recursive Best-First Search
+
+RBFS is a weird one. It tries to captilise on the standard best-first search and reduce the search space to linear. Being recursive, it's similar to that of the depth-first search, but uses an `f_limit` variable to keep track of the next best path available. If the current node exceeds this limit, the recursion unwinds to the alternative path. As it unwinds, the best f-value of the children of that unwound path is stored in each node. This way, RBFS remembers how to get back to the first best route if it decided earlier that it might not be optimal. Very odd, see the image for a better understanding.
+
+![RBFS](RBFS.png)
+
+The problem with this algorithm, while it can be more efficient than IDA*, is that it suffers from excessive node generation - nodes are generated more often than they're needed to be. I suppose this can be improved using caching, but the issue still stands.
+
+The reason, in general, that the RBFS backtracks at all and seems so uncertain of its choices, is because the heuristic tends to become less optimistic, and more accurate (remember the triangle) as the agent comes closer to the goal.
+
+RBFS is optimal if the heuristic function is admissible (which they ought to be anyway, really). Its space complexity is indeed linear with respect to the *deepest* optimal solution (worst case, $m$) and its time complexity is either $O(b^d)$ or $O(b^d\cdot d)$ in the case that every node results in backtracking. This also applies to DFS due to its recursive nature.
+
+The other downfall of RBFS is that it uses *too little* memory - it forgets the work it has done! This naturally leads to a lot of redundancy in reexpanding nodes it's already visited (and not because it's looping). This may lead to issues associated with redundant paths in graphs.
+
+#### Memory-Bounded A*
+
+This is a clever one. It relies on using the whole memory space allocated to it. However much memory you have, it'll use it. Best applied in huge problems (or if you just have little memory available).
+
+Let's talk about Simplified MA\* (SMA\*). This algorithm proceeds like A\*, but once memory is full of your silly little nodes, the worst one is dropped - the node with the highest f-value is dropped. This value is then backed up to the parent of that forgotten node. What this means is that, if all children of a given node are forgotten, we still have an indication of how worthwhile it is to go anywhere from that node. Useful!
+
+This algorithm is complete if there is any reachable solution within the physical memory of your machine - if $d$ is less than the memory size expressed in nodes. Optimal if any optimal solution is reachable, otherwise returning the best reachable solution. This is a pretty robust choice when the state space is a graph, step costs are *not* uniform, and node generation is expensive.
+
+However, on particularly problematic problems, SMA* will have to switch between candidate solution paths frequently. If this is the case, then most of those candidate paths will not fit in memory, creating a problem not unlike disk thrashing.
+
+## Heuristic Functions
+
+So, with all this in mind, how does one actually create a heuristic function? How do they make a *good* one at that?
+
+### The 8-puzzle
+
+![8-puzzle](../Week%202%20-%20Solving%20Problems%20with%20Search%20-%20uninformed%20search%20strategies/8_puzzle.png)
+
+The 8-puzzle, as discussed in week 2, has a much much larger state space than the vacuum problem. This makes it unfeasible to find a solution using uninformed search strategies. So how can we inform it?
+
+Let's create two heuristics, $h_1$ and $h_2$. Let's say:
+
+$$
+h_1: \text{the number of misplaced tiles}\\
+h_2: \text{the sum of the Manhattan distances}
+\\ \text{of each tile to their correct position}
+$$
+
+For the state shown in the image above, $h_1=8$ and $h_2=18$. Okay, so which is *better* for us? The average path cost for the 8-puzzle is actually around 26. It's fair to say that $h_2$ is closer than $h_1$ is.

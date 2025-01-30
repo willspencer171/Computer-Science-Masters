@@ -1,0 +1,12 @@
+name,informed,complete,optimal,time,time_class,space,space_class
+breadth-first search,0,1,0,O(b^d),exponential,O(b^d),exponential
+uniform cost search,0,1,1,O((b^d)log(b^d)),exponential logarithmic,O(b^d),exponential
+depth-first search (tree),0,0,0,O(b^m),exponential,O(bm),linear
+depth-first search (graph),0,1,0,O(b^m),exponential,O(bm),linear
+depth-first search (backtracking),0,1,0,O(b^m),exponential,O(m),linear
+depth limited search,0,0,0,O(b^d),exponential,O(bd),linear
+iterative deepening search,0,1,1,O(b^d),exponential,O(bd),linear
+greedy best-first search (tree),1,0,0,O(b^d),exponential,O(b^d),exponential
+greedy best-first search (graph,1,1,0,O(b^d),exponential,O(b^d),exponential
+dijkstra's algorithm,0,1,1,O((b^d)log(b^d)),exponential logarithmic,O(b^d),exponential
+A*,1,1,1,O((b^d)log(b^d)),exponential logarithmic,O(b^d),exponential

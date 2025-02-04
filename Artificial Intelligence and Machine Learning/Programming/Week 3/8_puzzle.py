@@ -1,41 +1,41 @@
 from A_star import *
+import math
 from scipy.spatial import distance
 
 class EightPuzzle(AStarProblem):
     def __init__(self, start):
         goal = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+        self.nrows = int(math.sqrt(len(goal)))
+        self.goal_positions = {tile: divmod(i, self.nrows) for i, tile in enumerate(goal)}
         super().__init__(start, goal)
 
     def neighbours(self, state):
         state = list(state)
         neighbours = []
         blank_index = state.index(0)
-        row, col = divmod(blank_index, 3)
+        row, col = divmod(blank_index, self.nrows)
         
         actions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
         for dr, dc in actions:
             new_row, new_col = row + dr, col + dc
-            if 0 <= new_row < 3 and 0 <= new_col < 3:
-                new_index = new_row * 3 + new_col
+            if 0 <= new_row < self.nrows and 0 <= new_col < self.nrows:
+                new_index = new_row * self.nrows + new_col
                 new_state = state[:]
                 new_state[blank_index], new_state[new_index] = new_state[new_index], new_state[blank_index]
                 neighbours.append((tuple(new_state), 1))  # Move cost is 1
         return neighbours
 
     def heuristic(self, state):
-        total_dist = 0
-        for i, tile in enumerate(state):
-            if tile == 0:
-                continue
-            goal_index = self.goal.index(tile)
-            total_dist += distance.cityblock(divmod(i, 3), divmod(goal_index, 3))
-        return total_dist
+        return sum(
+            distance.cityblock(divmod(i, self.nrows), self.goal_positions[tile])
+            for i, tile in enumerate(state) if tile != 0
+        )
     
-start_state = (2,5,4,3,6,0,1,7,8)
+start_state = (2,3,5,8,7,6,4,1,0)
 puzzle = EightPuzzle(start_state)
 
-solution = puzzle.astar()
+solution = puzzle.ida_star()
 
 print("Solution:")
 if solution is not None:

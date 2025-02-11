@@ -33,6 +33,11 @@ This is a whole chapter so only have a look through it. It should be useful in a
 1. [Principles of Logic and Propositional Logic](#principles-of-logic-and-propositional-logic)
     1. [Logical Agent Design (KB Agents)](#logical-agent-design-kb-agents)
     2. [The Wumpus World](#the-wumpus-world)
+    3. [Logic](#logic)
+    4. [Propositional Logic](#propositional-logic)
+    5. [What I Learned in the Quiz](#what-i-learned-in-the-quiz)
+    6. [The Activity](#the-activity)
+2. [Inference in Propositional Logic](#inference-in-propositional-logic)
 
 ## Principles of Logic and Propositional Logic
 
@@ -302,6 +307,135 @@ Which is cool and all. Lots of redundant atomic statements, however. Take the fi
 
 Which just really means they are semantically equivalent $$A\iff B$$ Which I have to say is interesting at the very least.
 
-## Lesson 2
+#### Proving Things
 
-### Section 5
+We can use all of these sentences to see what things can be proven. That is to ask in all models that satisfy the KB, which attributes are consistent?
+
+I asked for a bit of help about this and proofs can be done in 5 ish different ways. I'm going to show it with algebraic manipulation since that seems to stem naturally from the algebraic representation we have.
+
+1. $\lnot\text{Myth}\lor I$
+2. $\text{Myth}\lor\lnot I$
+3. $\text{Myth}\lor\text{Mam}$
+4. $\lnot I\lor H$
+5. $\lnot\text{Mam}\lor H$
+6. $\lnot H\lor \text{Mag}$
+
+First, we go back to the semantic equivalence of 1 and 2:$$\text{Myth}\iff I$$ Which allows us to substitute $\text{Myth}$ and $I$ for one another. We can now remove $\text{Myth}$ by substituting it for $I$ in statement 3:$$I\lor\text{Mam}$$
+
+Next, we distribute ORs between 3 and 4 to produce $$I\lor\text{Mam}\lor H$$. Since we already know $I\lor\text{Mam}$, we are left with $I\lor H$. Using absorption, we cancel out the $\lnot I$ and $I$ to leave only $H$, which means it is provable.
+
+> That bit works because we use absorption on the conjunctive clauses $$(I\lor H)\land(\lnot I\lor H)$$. The absorption law states:$$(A\lor B)\land(\lnot A\lor B)=B$$ And to assume H in this case to be false would be to assume $I\land\lnot I$, which is a contradiction. This forces H to be true
+
+Now that we know this, we can use this to show from statement 6 that $\text{Mag}$ is provably true. For the sentence $\lnot H\lor\text{Mag}$ to be true, $\text{Mag}$ must be true since $\lnot H$ is false.
+
+This is all we can prove with these statements. The unicorn must be horned and it must be magical, but we cannot prove its immortality, mythical status, or whether it is a mammal. We can, however, say that immortality and mythical(ity??) are equivalent.
+
+## Inference in Propositional Logic
+
+So it turns out I covered a bit of this at the end of the last lesson by doing the activity. This section introduces Conjunctive Normal Form (CNF), which is a form of logic that does not contain implications or biconditionals (so it only contains simple algebraic logic like $\land$, $\lor$ and $\lnot$). To do this, we have a series of transformations that would be nice to remember.
+
+### Logical Transformations
+
+![Logical Equivalences](logical_equivalences.png)
+
+First, we'll look at removing the implications and bidirectionals of propositional logic.
+
+#### Implication Elimination
+
+Given the following sentence $$A\implies B$$ we can eliminate the implication thusly: $$\lnot A \lor B$$ That's all it is.
+
+Another thing we can do with implication is an inference rule called *Modus Ponens*, which is written as a fraction: $$\frac{\alpha\implies\beta ,\quad\alpha}{\beta}$$ Which simply means "If we know $\alpha$, we can infer $\beta$"
+
+In fact, all the logical equivalences in the figure above can be used as logical inference rules where the $\equiv$ symbol essentially acts as the divider in the rule. Some, like bidirectional elimination are reversible
+
+Interestingly, in looking for valid models that satisfy the rules in a knowledge base, we can represent this as an AI search problem. This is much more effective than dealing with the exponential explosion of the size of the truth table if we were to list out every model possible. What's good about this is that this is a representation of the **SAT problem** - the first problem that was proven to be NP-complete
+
+### Resolution
+
+This was a hard one to get my head around and I think I should make an effort to come back to this. It's a foundation for a whole family of inference procedures that is complete in its effort to prove the entailment of two sentences ($a\vDash b$)
+
+The inference rule of resolution is: $$\frac{\ell_1\lor\cdots\lor\ell_k,\qquad m_1\lor\cdots m_n}{\ell_1\lor\cdots\lor\ell_{i-1}\lor\ell_{i+1}\lor\cdots\lor\ell_k\lor m_1\lor\cdots\lor m_{j-1}\lor m_{j+1}\lor\cdots\lor m_n}$$
+
+This is absolutely behemoth and frankly a little scary so let's pick it apart.
+
+**Resolution** is the same as cancelling complementary terms out. For example, if we have two rules $\lnot P_{2,2}$ and $P_{1,1}\lor P_{2,2}\lor P_{3,1}$, the $P_{2,2}$ terms resolve to yield $P_{1,1}\lor P_{3,1}$. This essentially translates to English as "If there is a pit in one of \[1,1], \[2,2] and \[3,1] and it isn't in \[2,2], then it must be in either of the others"
+
+This is known as the **unit resolution rule**, represented by the expression:
+
+$$\frac{\ell_1\lor\cdots\lor\ell_k,\qquad m}{\ell_1\lor\cdots\lor\ell_{i-1}\lor\ell_{i+1}\lor\cdots\lor\ell_k}$$
+
+Where each $\ell$ is a literal and $\ell_i$ and $m_i$ are complements of each other. This takes a clause (a disjunction of literals), and a literal to produce a new clause. A single literal can also be interpreted as a disjunction of literals, and is known as the **unit clause**. This expression can be generalised to the **full resolution rule** that I introduced at the start of this subsection.
+
+What this essentially does, very simply, is take two clauses and returns a new clause containing all literals *except* the complementary literals $\ell_i$ and $m_j$
+
+As per our example, we can say
+
+$$\frac{P_{1,1}\lor P_{3,1},\qquad \lnot P_{1,1}\lor\lnot P_{2,2}}{P_{3,1}\lor\lnot P_{2,2}}$$
+
+And that's the statement. Omg I'm so dumb, the returned clause is the statement on the bottom, it's not a denominator at all, it's a **RESULT**
+
+Here's some pseudocode for the resolution algorithm, should you ever choose to try and implement it:
+
+![Resolution Pseudocode](resolution_pseudo.png)
+
+### Conjunctive Normal Form
+
+As I briefly mentioned earlier, many procedures take logical sentences in a simple form, the most reduced form they can really take. We call this **Conjunctive Normal Form**. There are a few rules about this one that make it strict and hard to read, but simple nonetheless.
+
+1. There can be no bidirectionality
+2. There can be no implication
+3. $\lnot$ can only appear in literals, not expressions
+4. There can be no nested conjunctions or disjunctions
+
+What this means is to apply logical equivalence transformations to sentences to convert them to their simplest structures. Take the sentence $B_{1,1}\iff(P_{1,2}\lor P_{2,1})$ for example.
+
+1. Eliminate $\iff$
+    1. $(B_{1,1}\implies (P_{1,2}\lor P_{2,1}))\land((P_{1,2}\lor P_{2,1})\implies B_{1,1})$
+2. Eliminate $\implies$
+    1. $(\lnot B_{1,1}\lor P_{1,2}\lor P_{2,1})\land(\lnot (P_{1,2}\lor P_{2,1})\lor B_{1,1})$
+3. Apply De Morgan
+    1. $(B_{1,1}\lor P_{1,2}\lor P_{2,1})\land ((\lnot P_{1,2}\land\lnot P_{2,1})\lor B_{1,1})$
+4. Distribute $\lor$ over $\land$
+    1. $(\lnot B_{1,1}\lor P_{1,2}\lor P_{2,2})\land (\lnot P_{1,2}\lor B_{1,1})\land (P_{2,1}\lor B_{1,1})$
+
+And this is a really horrible format, but it's now in CNF as a conjunction of three sentences.
+
+### Horn and Definite Clauses
+
+As we looked at a bit earlier, a **clause** is defined as a disjunction of literals. They're very common, in fact. When it comes to inference, we have a very powerful inference rule in resolution, but sometimes we just don't need that kind of power since it is expensive.
+
+Many knowledge bases place restrictions on the types of sentences they contain, which makes it easier to create specialist rules that aren't as expensive as the resolution rule could be.
+
+Let's look at a specific set of clauses that constrains knowledge bases. First is the **definite clause**, which is a disjunction of literals in which *exactly* one is positive. That is to say, all but one of the literals (in CNF) is negative. An example could be $(\lnot A\lor B\lor \not C)$, or simply just $A$ is a *definite unit clause* otherwise known as a **fact**. The complement $\lnot A$ is not, however. That is to say that every definite clause can be more easily interpreted by a human as an implication whose premise is a conjunction of positive literals and the conclusion is a single positive literal.
+
+More generally, we have the Horn clause, which is a clause where *at most* one literal is positive. Under this restriction, a disjunction of only negative literals can be a Horn clause, as can the fact clause.
+
+Horn clauses can be used in inference using both **forward and backward chaining**. These are both examples of **natural** inference algorithms, meaning the inference is similar to human logic - we can follow each step logically. These algorithms are insanely *linear* in their time complexity and its in part due to the nature of Horn clauses.
+
+Knowledge bases, when we're adding to them, are effectively Horn clauses. Each sentence in a valid knowledge base must be true (otherwise the knowledge base is contradictory) and they comprise a conjunctive sentence.
+
+$$\text{KB}=(\alpha_1\land \alpha_2\land\cdots\land \alpha_n)$$
+
+If we assume this knowledge base implies another sentence ($\text{KB}\implies \beta$), this results in the Horn (definite) clause $\lnot\text{KB}\lor\beta$ which we can use the following algorithms to verify
+
+### Forward and Backward Chaining
+
+These algorithms that run in linear time are used to determine if a single proposition symbol (a **query**) is entailed by a knowledge base of *definite clauses* (they do work with Horn clauses, but in the case of purely negative clauses, they are typically better handled by constraint satisfaction over chaining).
+
+They work by either starting with the knowledge base and aiming to prove the query is a valid conclusion, or working backwards, treating the query like a goal. Going back to the implication inference method *Modus Ponens* $$\frac{\alpha\implies\beta,\quad\alpha}{\beta}$$ if all premises are known, then the conclusion can be added to the knowledge base. This process is recursive, and runs until either the query $q$ is added, or no further inferences (through reverse implication elimination) can be made.
+
+#### A Bit About AND-OR Graphs
+
+Before we go on, I'm going to introduce a new graphical representation of knowledge bases that actually makes things easier to understand. Consider the image below, where the knowledge base consists of the facts A and B and implications based on these facts, leading to Q. On the other side of the image is the AND-OR graph representation. Nodes connected together with a small arc at the confluence are **conjunctives**, while those without arcs are **disjunctives**. In terms of the Chaining algorithms, conjunctives require all connecting links to be proved, while disjunctive requires that any link can be proved.
+
+![AND-OR Graph](and_or_graph.png)
+
+#### Forward Chaining
+
+Forward chaining is an example of **data-driven reasoning**; this is reasoning where the main focus of attention is on known data. Every inference made is based on *Modus Ponens*, which we know to be *sound*, making the chaining algorithm equally sound. It is also complete, since it is based on *Modus Ponens*. *Modus Ponens* seems to have a lot to answer for with the chaining algorithms.
+
+The easiest way to see that chaining is complete is to consider the final state of the inferred table, where the algorithm reaches a **fixed point** (it can no longer make any inferences about its knowledge). The table will show true for every symbol inferred in the process (since they are conjunctive) and false for every other symbol (since they are not involved in this inference).
+
+Here's the pseudocode for the forward chaining algorithm that determines whether a query is entailed by the knowledge base. This works from the "bottom" of the graph above to the top.
+
+![Forward Chaining Pseudocode](fc_chaining.png)

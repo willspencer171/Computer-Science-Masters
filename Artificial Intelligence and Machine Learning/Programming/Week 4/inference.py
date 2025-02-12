@@ -1,7 +1,8 @@
 from logic import *
 from collections import deque, defaultdict
 
-def normalise_KB(KB):
+def normalise_KB_get_agenda(KB):
+    agenda = deque()
     new_KB = []
 
     for clause in KB:
@@ -9,12 +10,26 @@ def normalise_KB(KB):
             new_KB.append(Implication(TrueSymbol(), clause))
         else:
             new_KB.append(clause)
-        
-        return new_KB
 
-def forward_chaining(KB, agenda: deque[Symbol], query: Particle):
+        while True:
+            if not isinstance(clause.premise, Symbol):
+                clause = clause.premise
+                continue
+            elif not isinstance(clause.conclusion, Symbol):
+                clause = clause.conclusion
+                continue
+            else:
+                if clause not in agenda:
+                    agenda.append(clause)
+                break
+
+        print(agenda)
+        
+        return new_KB, agenda
+
+def forward_chaining(KB, query: Particle):
     """Implements forward chaining for definite clauses, supporting conjunctions."""
-    KB = normalise_KB(KB)
+    KB, agenda = normalise_KB_get_agenda(KB)
     inferred = defaultdict(bool)  # Track inferred facts
     count = {}  # Track how many premises are yet to be satisfied for each rule
     premise_map = defaultdict(list)  # Maps literals to the implications they appear in
@@ -27,7 +42,7 @@ def forward_chaining(KB, agenda: deque[Symbol], query: Particle):
             count[clause] = 2
             premise_map[clause.premise.left].append(clause)
             premise_map[clause.premise.right].append(clause)
-        else:
+        elif not isinstance(clause.premise, TrueSymbol):
             count[clause] = 1
             premise_map[clause.premise].append(clause)
 
@@ -79,4 +94,4 @@ KB = [
 
 # Provide a series of facts in the agenda as a deque, then a query
 
-print(forward_chaining(KB, deque([St11, Sa11, Sa21, St22, Sa22]), Wu12))
+print(forward_chaining(KB, Wu12))

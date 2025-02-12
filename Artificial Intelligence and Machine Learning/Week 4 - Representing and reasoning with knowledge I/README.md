@@ -480,7 +480,7 @@ The $\exists!$ symbol actually expands to mean something more like "For every co
 
 $$\forall x\ Country(x)\implies (\exists y\ Leader(y, x)\land\forall w\forall z\ (Leader(w,x)\land Leader(z, x)\implies w=z))$$
 
-Which is lengthy but it means that $exists!$ takes the general form:
+Which is lengthy but it means that $\exists!$ takes the general form:
 
 $$\exists y\ Function(y)\land\forall x\forall z (Function(x)\land Function(z)\implies x=z)$$
 

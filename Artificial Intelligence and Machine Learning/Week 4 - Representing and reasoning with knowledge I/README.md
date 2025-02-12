@@ -38,6 +38,12 @@ This is a whole chapter so only have a look through it. It should be useful in a
     5. [What I Learned in the Quiz](#what-i-learned-in-the-quiz)
     6. [The Activity](#the-activity)
 2. [Inference in Propositional Logic](#inference-in-propositional-logic)
+    1. [Logical Transformations](#logical-transformations)
+    2. [Resolution](#resolution)
+    3. [Conjunctive Normal Form](#conjunctive-normal-form)
+    4. [Horn and Definite Clauses](#horn-and-definite-clauses)
+    5. [Forward and Backward Chaining](#forward-and-backward-chaining)
+3. [Introduction to First Order Logic](#introduction-to-first-order-logic)
 
 ## Principles of Logic and Propositional Logic
 
@@ -439,3 +445,43 @@ The easiest way to see that chaining is complete is to consider the final state 
 Here's the pseudocode for the forward chaining algorithm that determines whether a query is entailed by the knowledge base. This works from the "bottom" of the graph above to the top.
 
 ![Forward Chaining Pseudocode](fc_chaining.png)
+
+## Introduction to First Order Logic
+
+First-order logic seems to be a bit less intuitive to start with than propositional logic. However, from a programming perspective, it makes a lot of sense.
+
+**First-order logic**, in contrast to the specification of truth values in propositional logic, assumes the world is full of objects, and the logic represents the *relationships between those objects*.
+
+We often say that FO logic is more expressive and compact than propositional logic, because we only use two symbols to express either "all" and "there exists". This allows us to write sentences like "for every person, there exists a parent", which can be written like:
+
+$$\forall x.\ Person(x)\implies \exists p.\ Parent(p,x)$$
+
+| Name            | Symbol     | LaTeX     |
+| --------------- | ---------- | --------- |
+| For All         | $\forall$  | \\forall  |
+| Unique Object   | $\forall!$ | \\forall! |
+| Exists          | $\exists$  | \\exists  |
+| Exists Only One | $\exists!$ | \\exists! |
+| Does not exist  | $\nexists$ | \\nexists |
+
+And we can do all sorts of things with this. We can also convert between different forms of each of these operators.
+
+These two operators are called quantifiers. They set out how many of an object there might be in a relationship. For example, "Every Country must have one leader" can be written as:
+
+$$\forall!x\ Country(x)\implies \exists y Leader(y, x)$$
+
+Which can be read as "for every country, there exists a unique leader". From what I gather, the $\forall!$ term is not that common, and this can be rewritten using the $\exists!$ quantifier instead:
+
+$$\forall x Country(x)\implies \exists!y\ Leader(y, x)$$
+
+Which more explicitly says "For every country, there exists just one leader"
+
+The $\exists!$ symbol actually expands to mean something more like "For every country, there is a leader, and if there are two leaders, they are assumed to be the same person:
+
+$$\forall x\ Country(x)\implies (\exists y\ Leader(y, x)\land\forall w\forall z\ (Leader(w,x)\land Leader(z, x)\implies w=z))$$
+
+Which is lengthy but it means that $exists!$ takes the general form:
+
+$$\exists y\ Function(y)\land\forall x\forall z (Function(x)\land Function(z)\implies x=z)$$
+
+ensuring uniqueness.

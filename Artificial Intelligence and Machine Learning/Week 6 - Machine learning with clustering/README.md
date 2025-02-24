@@ -89,3 +89,13 @@ If you want to find out a bit more about how to optimise the k-means algorithm, 
 A little bit of talk there about hyperspheres which was fun. Also brush up on your definitions of hyperplanes. In many instances they are decision boundaries, but not in the case of kD-trees and ball trees, they're just splits in the data.
 
 ## Principles and Pitfalls of Supervised Learning
+
+Okay so I kinda went ahead and did this in the last section (oopsies!) and also the further reading was to look into k-nearest neighbours which I looked at a bit in the section 4.7 part. Cool. Anyway, the title of this section is Principles and Pitfalls of Supervised Learning so let's have a look at the main pitfalls:
+
+- Attempting to learn using an inappropriate hypothesis space;
+- Using the entire data set for training and failing to test whether the hypothesis generalizes well;
+- Learning a very complex hypothesis that is accurate on the training set but less accurate on the test set, and probably also less accurate when deployed in the real world.
+
+Out of these three main pitfalls, the first two are common sense and standard practice - don't use a hypothesis space that's irrelevant to what you're trying to find out, and don't use your whole dataset as a training set unless you have separated it from some testing samples (think `sklearn`'s `train_test_split` method).
+
+The last one is about model **overfitting** which is a big problem that pretty much all learning approaches suffer from. It makes sense - imagine you've been taught something your whole life and it turns out that when you get to adulthood, that behaviour you were taught is harmful. Specialise that to your data and that translates to "your model is perfect for the data you trained it on, but doesn't work well for new data". So be careful, yeah?

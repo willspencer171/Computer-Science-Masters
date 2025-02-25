@@ -52,11 +52,20 @@ It is easy to see, really, that linear regression is not particularly effective 
 
 ![Anscombe's Quartet](lin_reg.png)
 
-This set of particular graphs is called Anscombe's Quartet. of the four, only the first is really a linear fit, even if only loosely. The third highlights how anomalies are a part of the regression, and can throw off the predictions by some margin. The second shows poor fit of a non-linear dataset, and the last is just crap.
+This set of particular graphs is called Anscombe's Quartet. Of the four, only the first is really a linear fit, even if only loosely. The third highlights how anomalies are a part of the regression, and can throw off the predictions by some margin. The second shows poor fit of a non-linear dataset, and the last is just crap.
 
 ### Logistic Regression
 
-Linear regression can technically be used in classification of just about any categorical data too. We can use it as a numeric *membership function*.
+Linear regression can technically be used in classification of just about any categorical data too. We can use it as a numeric *membership function*. Slight problem with this is that, while this is supposed to mimic the probability of an instance's membership, the actual values for a **multiresponse linear regression** can fall outside the values of 0-1. Aside from this, the linear regression assumes that our values are drawn from a normally distributed space, and that features are independent of one another. So we need an alternative.
+
+Enter **Logistic Regression**. This is a slight variation on the linear regression that we used earlier. We replace the original target variable with a logit-transformed version. This transformed variable can now be approximated using a linear function as we did with linear regression. This is why we often refer to logistic regression as an instance of the **Generalised Linear Model (GLM)**. Linear regression also is, but we call it ordinary least squares (OLS).
+
+Instead of using the squared error to measure goodness of fit, logistic regression uses the **log-likelihood**, which is given using a horrible equation:
+
+$$\sum_{i=1}^{n} \left( (1 - x^{(i)}) \log\left(1 - \Pr\lbrack 1 \mid a_1^{(i)}, a_2^{(i)}, \dots, a_k^{(i)} \rbrack \right) + x^{(i)} \log\left(\Pr\lbrack 1 \mid a_1^{(i)}, a_2^{(i)}, \dots, a_k^{(i)} \rbrack \right) \right)
+$$
+
+Instead of minimising the squared error, however, our job is to maximise the log-likelihood. This can be done iteratively, maybe I'll get [some code](../Programming/Extras/logistic_regression.py) for that. We can also generalise this for multiple classes, but we have to assume they are interdependent on one another.
 
 ## Neural Networks and Deep Learning
 

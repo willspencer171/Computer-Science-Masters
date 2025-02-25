@@ -119,4 +119,38 @@ Lovely.
 
 I've tried making some code for this but I think I'll have to revisit it once I understand better what I'm looking at
 
+### Multi-Layer Neural Networks
+
+So, we've kind of seen how a single-layer neural network struggles to represent some functions like XOR because there isn't a single hyperplane that can classify its outputs. Not ideal. However, if we introduce a second nonlinear layer to this network (a **hidden layer**) we can generate a decision boundary that is non-linear!
+
+There's a lot of really gross maths in here about loss functions and learning but here we go anyway
+
+This builds on a concept used in supervised learning called **gradient descent** (see chapter 19.6 in AIML) (opposite to the gradient ascent used in logistic regression!). The gradient that we aim to minimise in this instance is that of the loss function with respect to the weights. Descending this gradient to find the global minimum optimises the weights for each input. This process is simple for nodes leading into units in the output layer, but for those not directly connected to the output, this is a little different.
+
+<details><summary><h4>Gradient Descent</h4></summary>
+Gradient descent uses partial derivatives of the loss function with respect to the weight to optimise the weight incrementally until converging on the global minimum
+
+I won't go through the step by step of it here, but it uses the chain rule of calculus to work out the partial derivatives. By the end of it all, we get a function that updates the weight of each parameter:
+
+$$w_i\leftarrow w_i + a\sum_j (y_j-h_w(x_j))\times x_j$$
+
+where $a$ is known as the learning rate of the function.
+
+This is known as the batch gradient descent. There are other types of gradient descent, specifically there is stochastic gradient descent, that randomly selects a small sample of training examples at each step
+</details>
+
+The thing that makes the neural network version of this gradient descent is that for each layer away from the output, we have to apply the chain rule one more time, which, if you're not too familiar, isn't tooooooo bad I don't think?
+
+Anyway, we need to talk about error. The neural network's units have a sort of perceived error where they receive their inputs. We define the error as $\Delta_n=-2(\hat{y}-y)g_5^\prime(\text{in}_5)$, then the gradient with respect to an input unit's weight $w_m$ is just $\Delta_n a_m$, where $a$ the learning rate of the unit before. We can use this term to determine which direction and by how much the parameter should be shifted.
+
+This perceived error is **back-propagated** through the network recursively. I've exhausted myself going through this I think.
+
+Anyway, nice image to finish off with:
+
+![MLNN](mlnn.png)
+
+This graph representation of a multi-layered network has 8 units. Since each unit has a given number of inputs, each input has a weight and, as such, there are 16 weights in this image (2 for each of the hidden layer's units and 4 for the output layer's)
+
+### Convolutional Neural Networks
+
 ## Perils of Machine Learning in the Real World

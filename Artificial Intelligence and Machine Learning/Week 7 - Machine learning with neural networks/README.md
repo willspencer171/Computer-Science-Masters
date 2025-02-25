@@ -69,4 +69,54 @@ Instead of minimising the squared error, however, our job is to maximise the log
 
 ## Neural Networks and Deep Learning
 
+This is going to be the most interesting portion of this week's content. Neural networks are, in reality, similar to logistic regression in nature. Each neuron in a network is mathematically just a nonlinear regression model combined with an activation function which 'fires' the neuron. The actual connection to neural networks in nature is superficial, but it works well.
+
+One of the reasons why neural networks have advantages over logistic and linear regression is the ability to express nonlinearity and interdependence between features. This does somewhat complicate how easy it is for a human to interpret the inner workings of the neural network (since we start representing things in much higher dimensions), which is what makes deep learning seem so scary to the uninformed (and perhaps the too-well informed).
+
+Neural networks also manage to increase the length of the path from each input to the output. We can look at linear and logistic regression as a neural network with only input nodes and one output node, with no intermediate paths in between. The image below shows how linear regression is a shallow model, decision list representations can have long paths, and neural networks can have long paths and interplay between features:
+
+![Comparison of Network Depth and Length](graph_comp.png)
+
+### FeedForward Networks
+
+As the name implies, **feedforward networks** are unidirectional, where the results from one node feed directly into the next. Each node is more technically called a **unit**. These networks do not have loops and there is a predictable flow from input to output. On the other hand, **recurrent networks** support loops where the intermediate or final outputs are fed back into the input.
+
+Boolean logical functions are examples of feedforward networks. Logic circuits just take 1 or 0 as inputs and each node implements a boolean function. This is a special kind of network, where normal networks make use of continuous variables instead of binary inputs.
+
+Some (not all) input nodes are parameters of the network, which are adjusted during training to fit the data.
+
+Each unit takes inputs and returns an output based on a nonlinear function with the following form:
+
+$$a_j=g_j(\sum_i w_{i,j}a_i)\equiv g_j(\text{input}_j)$$
+
+where $g_j$ is the activation function and $\text{input}_j$ is the weighted sum of the inputs to the unit $j$. We add a dummy unit ($j=0$) to each unit with a weight. This allows the weighted input ($\text{input}_j$) to be nonzero even if preceeding outputs are zero.
+
+The activation function, $g_j$ is nonlinear. This is to allow the network to be expressive in its representation of functions (since we're still trying to prove a hypothesis here). A few different activation functions are used. Here are some of the most common:
+
+1. Sigmoid
+    1. Just like with logistic regression
+    2. $\sigma(x)=1\(1+e^{-x})$
+2. The Rectified Linear Unit (ReLU)
+    1. $ReLU(x) = max(0, x)$
+3. Softplus
+    1. A smoothed version of ReLU
+    2. $\text{softplus}(x)=\log(1+e^x)$
+4. Tanh
+    1. $tanh(x)=\frac{e^{2x}-1}{e^{2x}+1}$
+    2. This is a scaled and shifted version of the sigmoid
+
+What's odd about these functions is that, in a single-layer neural network, functions as simple as a logicl XOR cannot be represented and this is because there is no straight line boundary that separates 1 and 0. What this means is that a single-layer neural network with a logistic or hard threshold function can only produce a linear (or hyperplane) decision boundary.
+
+What we then need are more LAYERS. How can we represent more layers mathematically? Here's the shorthand. If we use $W$ to represent the matrix containing weights at each level of the network, we can represent the hypothesis space as:
+
+$$h_w(x)=g^{(2)}(W^{(2)}g^{(1)}(W^{(1)}x))$$
+
+Problem is, it's hard to write this in shorter form, but I can represent it in function composition to make it more legible:
+
+$$h_w(x)=(g_2 \circ W_2 \circ g_1 \circ W_1)(x)$$
+
+Lovely.
+
+I've tried making some code for this but I think I'll have to revisit it once I understand better what I'm looking at
+
 ## Perils of Machine Learning in the Real World

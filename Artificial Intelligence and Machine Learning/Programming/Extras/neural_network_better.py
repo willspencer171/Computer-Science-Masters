@@ -4,7 +4,7 @@ layers"""
 
 import numpy as np
 import pandas as pd
-from typing import Optional
+from typing import Optional, Type, Literal
 
 ### Layer types ###
 
@@ -39,6 +39,152 @@ class FullyConnected(Layer):
     def get_params_and_grads(self):
         # Return parameters with their corresponding gradients
         return [(self.weights, self.grad_weights), (self.bias, self.grad_bias)]
+
+class ConvLayer(Layer):
+    def __init__(self, input_shape: tuple[int, int, int], 
+                kernel_size: int, num_filters: int, 
+                stride=1, padding=0):
+        """
+        Convolutional Layer
+        
+        Parameters:
+        -----------
+        input_shape : tuple
+            Shape of input (channels, height, width)
+        kernel_size : int
+            Size of the convolutional kernel (square)
+        num_filters : int
+            Number of convolutional filters
+        stride : int
+            Stride of the convolution
+        padding : int
+            Zero padding to add to the input
+        """
+        self.input_shape = input_shape
+        self.in_channels = input_shape[0]
+        self.kernel_size = kernel_size
+        self.num_filters = num_filters
+        self.stride = stride
+        self.padding = padding
+        
+        # Initialize weights and bias
+        self.weights = np.random.randn(num_filters, self.in_channels, kernel_size, kernel_size) * 0.01
+        self.bias = np.zeros((num_filters, 1))
+        
+        # Cache for backward pass
+        self.input = None
+        self.output = None
+        
+        # For use with optimizer
+        self.weight_gradients = np.zeros_like(self.weights)
+        self.bias_gradients = np.zeros_like(self.bias)
+    
+    def _pad_input(self, x):
+        """Add zero padding to the input"""
+        if self.padding > 0:
+            return np.pad(
+                x, 
+                ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)), 
+                'constant'
+            )
+        return x
+    
+    def forward(self, x):
+        batch_size, _, height, width = x.shape
+        self.input = x
+        
+        # Pad input
+        x_padded = self._pad_input(x)
+        
+        # Calculate output dimensions
+        out_height = (height + 2 * self.padding - self.kernel_size) // self.stride + 1
+        out_width = (width + 2 * self.padding - self.kernel_size) // self.stride + 1
+        
+        # Initialize output
+        output = np.zeros((batch_size, self.num_filters, out_height, out_width))
+        
+        # Implement convolution using tensordot for each spatial location
+        for h in range(out_height):
+            for w in range(out_width):
+                h_start = h * self.stride
+                h_end = h_start + self.kernel_size
+                w_start = w * self.stride
+                w_end = w_start + self.kernel_size
+                
+                # Extract patches [batch, channels, kernel_size, kernel_size]
+                patches = x_padded[:, :, h_start:h_end, w_start:w_end]
+                
+                # Use tensordot to compute output for this position
+                # Sum over channels and both spatial dimensions (axes 1, 2, 3)
+                output[:, :, h, w] = np.tensordot(patches, self.weights, axes=([1, 2, 3], [1, 2, 3]))
+        
+        # Add bias to each filter's output
+        for f in range(self.num_filters):
+            output[:, f] += self.bias[f]
+        
+        self.output = output
+        return output
+
+    def backward(self, grad_output: np.ndarray):
+        # Initialize gradients
+        grad_input = np.zeros_like(self.input)
+        self.weight_gradients = np.zeros_like(self.weights)
+        self.bias_gradients = np.sum(grad_output, axis=(0, 2, 3))  # Sum over batch, height, width
+
+        # Pad input and gradient input
+        input_padded = self._pad_input(self.input)
+        grad_input_padded = np.pad(grad_input, ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)))
+
+        # Extract patches using strided slicing
+        patches = np.lib.stride_tricks.sliding_window_view(
+            input_padded, (self.kernel_size, self.kernel_size), axis=(2, 3)
+        )[:, :, ::self.stride, ::self.stride]
+
+        # Compute weight gradients using tensordot
+        self.weight_gradients = np.tensordot(grad_output, patches, axes=([0, 2, 3], [0, 2, 3]))
+
+        # Compute input gradients using tensordot
+        flipped_weights = np.flip(self.weights, axis=(2, 3))  # Flip spatial dimensions
+        grad_input_padded = np.tensordot(grad_output, flipped_weights, axes=([1], [0]))
+
+        # Remove padding if applied
+        if self.padding > 0:
+            grad_input = grad_input_padded[:, :, self.padding:-self.padding, self.padding:-self.padding]
+        else:
+            grad_input = grad_input_padded
+
+        return grad_input
+    
+    @property
+    def get_params_and_grads(self):
+        """Get parameters and gradients for optimizer"""
+        return [(self.weights, self.weight_gradients), (self.bias, self.bias_gradients)]
+    
+class FlattenLayer:
+    def __init__(self):
+        """
+        Flatten layer to transition from convolutional layers to fully connected layers
+        """
+        self.input_shape = None
+    
+    def forward(self, x):
+        """
+        Forward pass - flatten input from (batch_size, channels, height, width) to (batch_size, channels*height*width)
+        """
+        self.input_shape = x.shape
+        batch_size = x.shape[0]
+        return x.reshape(batch_size, -1)
+    
+    def backward(self, grad_output):
+        """
+        Backward pass - reshape gradient back to the original input shape
+        """
+        return grad_output.reshape(self.input_shape)
+    
+    @property
+    def get_params_and_grads(self):
+        """No parameters to update"""
+        return None
     
 ### Activation Layers ###
 
@@ -78,29 +224,105 @@ class Softmax(ActivationLayer):
         return self.output
 
     def backward(self, grad_output):
-        s = self.output.reshape(-1, 1)
-        return np.diagflat(s) - np.dot(s, s.T)  # Not great as it runs in O(n^2) time
+        # Compute gradient using element-wise multiplication (efficient)
+        softmax_grad = self.output * (grad_output - np.sum(grad_output * self.output, axis=1, keepdims=True))
+        
+        return softmax_grad
 
 ### Loss functions ###
 
-class MSELoss:
-    def forward(self, predicted: np.ndarray, target: np.ndarray):
+class LossFunction:
+    def __init__(self, reg_method: Literal['l1','l2'], lambda_regularisation: float=0):
+        self.lambda_ = lambda_regularisation
+        self.regularisation = reg_method
+    
+    def forward(self, predicted:np.ndarray, target: np.ndarray, model: Type['NeuralNetwork']):
+        raise NotImplementedError
+    
+    def backward(self):
+        raise NotImplementedError
+    
+    def __str__(self):
+        return f'{type(self).__name__}'
+
+class MSELoss(LossFunction):
+    def __init__(self, reg_method, lambda_regularisation = 0):
+        super().__init__(reg_method, lambda_regularisation)
+
+    def forward(self, predicted: np.ndarray, target: np.ndarray, model:Type['NeuralNetwork']):
         # Store for backward pass
         self.predicted = predicted
         self.target = target
         # Compute mean squared error
         loss = np.mean((predicted - target) ** 2)
+
+        # Add L1/2 regularization term (if model is provided)
+        if model:
+            # Sum of squared weights for L2 regularization
+            reg = 0
+            for layer in model.layers:
+                if hasattr(layer, 'weights'):
+                    match self.regularisation:
+                        case 'l1':
+                            reg += np.sum(np.abs(layer.weights))
+                        case 'l2':
+                            reg += np.sum(layer.weights ** 2)
+
+
+            loss += self.lambda_ * reg
+
         return loss
 
     def backward(self):
         gradient = 2* (self.predicted - self.target) / self.predicted.size
         return gradient
-    
+
+class CrossEntropyLoss(LossFunction):
+    def __init__(self, reg_method: Literal['l1', 'l2'] = None, lambda_regularisation: float = 0):
+        super().__init__(reg_method, lambda_regularisation)
+        self.predicted = None  # Store predicted values for backward pass
+        self.target = None      # Store target values for backward pass
+
+    def forward(self, predicted: np.ndarray, target: np.ndarray, model: Type['NeuralNetwork']):
+        batch_size = predicted.shape[0]
+        
+        # Stabilize predictions to prevent log(0)
+        predicted = np.clip(predicted, 1e-15, 1 - 1e-15)
+
+        # Compute cross-entropy loss
+        loss = -np.sum(target * np.log(predicted)) / batch_size
+
+        # Store for backward pass
+        self.predicted = predicted
+        self.target = target
+
+        # Apply regularization
+        if self.lambda_ > 0:
+            if self.regularisation == "l1":
+                reg_loss = self.lambda_ * sum(np.sum(np.abs(layer.weights)) for layer in model.layers if hasattr(layer, 'weights'))
+            elif self.regularisation == "l2":
+                reg_loss = self.lambda_ * sum(np.sum(layer.weights ** 2) for layer in model.layers if hasattr(layer, 'weights'))
+            else:
+                reg_loss = 0
+            loss += reg_loss / batch_size  # Normalize by batch size
+
+        return loss
+
+    def backward(self):
+        """
+        Compute the gradient of the cross-entropy loss with respect to predictions.
+
+        Returns:
+        --------
+        np.ndarray
+            The computed gradient with shape (batch_size, num_classes).
+        """
+        batch_size = self.predicted.shape[0]
+        return (self.predicted - self.target) / batch_size  # Normalized gradient
+
     def __str__(self):
-        return self.__repr__()
-    
-    def __repr__(self):
-        return f'{type(self).__name__}'
+        return f'CrossEntropyLoss (Regularization: {self.regularisation}, λ: {self.lambda_})'
+        
 
 ### Optimisers ###
 
@@ -120,9 +342,6 @@ class Optimiser:
         raise NotImplementedError
     
     def __str__(self):
-        return self.__repr__()
-    
-    def __repr__(self):
         return f'{type(self).__name__}, Learning rate: {self.learning_rate}, Batch size: {self.batch_size}'
 
 class SGD(Optimiser):
@@ -149,7 +368,7 @@ class SGD(Optimiser):
     
     def step(self, parameters):
         for param, grad in parameters:
-            param -= self.learning_rate * grad
+            param -= self.learning_rate * grad.reshape(param.shape)
         
         self.zero_grad()
     
@@ -190,10 +409,6 @@ class NeuralNetwork:
         # I'd like to put the training method in here, but I think that might require
         # integrating loss functions into the network itself.
         # It can be done!
-        
-        # Required to fix broadcasting issues that otherwise prevented networks
-        # from having flexible structures - much faster now!
-        y_train = y_train.reshape(-1, 1)
 
         # Losses held in a list so I can output how the 
         # loss changes over the course of training
@@ -213,7 +428,7 @@ class NeuralNetwork:
             for X_batch, y_batch in optimiser.get_batches(X_train, y_train):
                 # Forward pass
                 predictions = self.forward(X_batch)
-                total_loss += loss.forward(predictions, y_batch)
+                total_loss += loss.forward(predictions, y_batch, self)
                 
                 # Backward pass
                 grad_loss = loss.backward()
@@ -223,46 +438,20 @@ class NeuralNetwork:
                 optimiser.step(self.get_params_and_grads)
 
             self.losses.append(total_loss)
-            print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {total_loss:.4f}")
-        
 
-from sklearn.datasets import load_diabetes
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+            if epoch % 10 == 9:
+                print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {total_loss:.4f}")
 
-# Load data
-diabetes = load_diabetes()
-X, y = diabetes.data, diabetes.target
-
-# Preprocess the data (e.g., scaling)
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-# Split into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-
-network = NeuralNetwork()
-
-""" network.add(FullyConnected(X_train.shape[1], 128))
-network.add(FullyConnected(128, 64)) """
-
-# Network architecture
-network.add(FullyConnected(X_train.shape[1], 256))
-network.add(ReLU())
-network.add(FullyConnected(256, 128))
-network.add(ReLU())
-network.add(FullyConnected(128, 64))
-network.add(ReLU())
-network.add(FullyConnected(64, 10))
-
-network.fit(X_train, y_train, MSELoss(), SGD(learning_rate=.00001, batch_size=128), num_epochs=2000)
-
-from matplotlib import pyplot as plt
-fig, ax = plt.subplots()
-
-ax.plot(pd.Series(network.losses))
-ax.set_ylabel('Loss')
-ax.set_xlabel('Epoch')
-ax.set_title(f'{network.loss}, {network.optimiser},\n{network.num_epochs} epochs')
-
-plt.show()
+    def predict(self, X_test: np.ndarray):
+        """
+        Make predictions on test data
+        """
+        return self.forward(X_test)
+    
+    def evaluate(self, X_test: np.ndarray, y_test: np.ndarray):
+        """
+        Evaluate the model on test data and return the loss
+        """
+        predictions = self.predict(X_test)
+        test_loss = self.loss.forward(predictions, y_test, self)
+        return test_loss, predictions

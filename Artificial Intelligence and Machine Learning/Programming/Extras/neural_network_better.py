@@ -3,7 +3,7 @@ network that supports both fully-connected and convolutional
 layers"""
 
 import numpy as np
-import pandas as pd
+from scipy import signal
 from typing import Optional, Type, Literal
 
 ### Layer types ###
@@ -41,6 +41,51 @@ class FullyConnected(Layer):
         return [(self.weights, self.grad_weights), (self.bias, self.grad_bias)]
 
 class ConvLayer(Layer):
+    """See YouTube video for full breakdown of principles behind why this works
+    https://www.youtube.com/watch?v=Lakz2MoHy6o"""
+    def __init__(self, input_shape: tuple[int, int, int],
+                 kernel_size: int, num_kernels: int):
+        (self.input_depth,
+        input_height,
+        input_width) = input_shape
+        self.depth = num_kernels
+        self.input_shape = input_shape
+        self.output_shape = (self.depth, 
+                             input_height - kernel_size + 1, 
+                             input_width - kernel_size + 1)
+        self.kernels_shape = (self.depth, self.input_depth, 
+                              kernel_size, kernel_size)
+        self.kernels = np.random.randn(*self.kernels_shape)
+        self.biases = np.random.randn(*self.output_shape)
+        print(self.output_shape)
+
+    def forward(self, input_data):
+        self.input_data = input_data
+        self.output_data = np.copy(self.biases)
+        for i in range(self.depth):
+            for j in range(self.input_depth):
+                print(f"{self.input_data[j][0].ndim}, {self.kernels[i, j].ndim}")
+                self.output_data[i] += signal.correlate2d(self.input_data[j][0], self.kernels[i, j], 'valid')
+                
+        return self.output_data
+    
+    def backward(self, output_grad):
+        self.bias_grad = output_grad.copy()
+        self.kernels_gradient = np.zeros(self.kernels_shape)
+        self.input_gradient = np.zeros(self.input_shape)
+
+        for i in range(self.depth):
+            for j in range(self.input_depth):
+                self.kernels_gradient[i, j] = signal.correlate2d(self.input_data[j], output_grad[i], 'valid')
+                self.input_gradient[j] += signal.convolve2d(output_grad[i], self.kernels[i, j], 'full')
+
+    @property
+    def get_params_and_grads(self):
+        # Return parameters with their corresponding gradients
+        return [(self.kernels, self.kernels_gradient), (self.biases, self.bias_grad)]
+
+
+class ConvLayerHmm(Layer):
     def __init__(self, input_shape: tuple[int, int, int], 
                 kernel_size: int, num_filters: int, 
                 stride=1, padding=0):

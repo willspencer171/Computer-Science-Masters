@@ -226,3 +226,7 @@ How about the last layer? This one is fully connected to 10 output neurons (yike
 The total number of weights in this network, then, is $50+105+7210=7365$! Lovely.
 
 ## Perils of Machine Learning in the Real World
+
+This is a really small section but it's just about how machine learning is used in the real world and how we should be cautious about how we use it and how reliant we become on it.
+
+Machine learning is used in autonomous systems like driverless cars and, well, we all know what happens with those. Same goes for trains and such. One of the main issues with machine learning is interpretability. For example, in a neural network, we can see that a model has been trained well to understand the difference between a dog and a human, but we can't necessarily elucidate *how* it knows that. What this means is that we can't determine under which circumstances a model might get that wrong.

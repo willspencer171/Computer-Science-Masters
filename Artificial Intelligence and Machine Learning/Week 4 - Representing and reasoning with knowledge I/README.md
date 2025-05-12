@@ -412,7 +412,7 @@ As we looked at a bit earlier, a **clause** is defined as a disjunction of liter
 
 Many knowledge bases place restrictions on the types of sentences they contain, which makes it easier to create specialist rules that aren't as expensive as the resolution rule could be.
 
-Let's look at a specific set of clauses that constrains knowledge bases. First is the **definite clause**, which is a disjunction of literals in which *exactly* one is positive. That is to say, all but one of the literals (in CNF) is negative. An example could be $(\lnot A\lor B\lor \not C)$, or simply just $A$ is a *definite unit clause* otherwise known as a **fact**. The complement $\lnot A$ is not, however. That is to say that every definite clause can be more easily interpreted by a human as an implication whose premise is a conjunction of positive literals and the conclusion is a single positive literal.
+Let's look at a specific set of clauses that constrains knowledge bases. First is the **definite clause**, which is a disjunction of literals in which *exactly* one is positive. That is to say, all but one of the literals (in CNF) is negative. An example could be $(\lnot A\lor B\lor \lnot C)$, or simply just $A$ is a *definite unit clause* otherwise known as a **fact**. The complement $\lnot A$ is not, however. That is to say that every definite clause can be more easily interpreted by a human as an implication whose premise is a conjunction of positive literals and the conclusion is a single positive literal.
 
 More generally, we have the Horn clause, which is a clause where *at most* one literal is positive. Under this restriction, a disjunction of only negative literals can be a Horn clause, as can the fact clause.
 

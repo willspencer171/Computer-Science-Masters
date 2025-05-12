@@ -95,7 +95,7 @@ The activation function, $g_j$ is nonlinear. This is to allow the network to be 
 
 1. Sigmoid
     1. Just like with logistic regression
-    2. $\sigma(x)=1\(1+e^{-x})$
+    2. $\sigma(x)=1(1+e^{-x})$
 2. The Rectified Linear Unit (ReLU)
     1. $ReLU(x) = max(0, x)$
 3. Softplus

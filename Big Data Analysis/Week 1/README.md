@@ -73,6 +73,71 @@ Why have I just done a deep dive into a bunch of philosophers and found out that
 
 This is perhaps a little more interesting than the history of data itself.
 
+Originally, statistics referred to the collection and analysis of data about the state such as demographics and economy. However, we have since applied the tools created in statistics to cover data as a whole.
+
+Descriptive statistics summarise data. These include measures of central tendency (mean, median etc.) and measure of variance (such as the range). Lots of work in the 16-1700s by mathematicians, physicists and philosophers led to probability theory, which underpins an awful lot of statistical learning.
+
+Carl Friedrich Gauss did a lot of things. He was the god of shortcuts (shoutout to the Art of the Shortcut). He developed the method of least squares, which allows us to find the best model that fits data such that error is minimised. This gave rise to linear and logistic regression which were extended into the artificial neural network.
+
+Then comes visualisation. William Playfair, a Scottish engineer, invented statistical graphics around 1800. Because of him, we now have data visualisation and exploratory data analysis. He invented line charts, area charts, time-series data, bar charts and pie charts. Since then, as data have become larger and more complex, it's become more difficult to visualise data of higher dimensions.
+
+Since we can't see things in any dimensions higher than 3, we need to reduce our dimensionality to that or lower. This can be done using a technique called t-distributed stochastic neighbour embedding (t-SNE).
+
+Drawing into the 20th Century, Karl Pearson developed hypothesis testing (the guy that did Pearson correlation and its derivatives) and R. A. Fisher developed statistical methods for multivariate analysis (ANOVA etc.) and the maximum likelihood estimate to draw conclusions from the probabilities of events.
+
+We start coming to what we now recognise as artificial intelligence and machine learning. It was around the 1940s that the mathematical model for a neural network was developed, information theory was introduced, classification problems were defined leading to nearest-neighbour models and eventually the birth of artificial intelligence in Dartmouth College.
+
+![The Unfortunately Large Skillset of a Data Scientist](../Images/skillset.png)
+
+There was a lot of reading for this lesson. Lots of it is contextual for data science. I won't go into it further, but I might like to read it another time.
+
 ## Lesson 2: The Data Science Process
 
+In general, there are 6 steps in the data science process
+
+1. Set Research Goals
+2. Data Acquisition
+3. Data Cleaning
+    1. Takes around 80% of your time apparently
+4. Analysis
+5. Evaluate
+6. Present Results
+
+These constitute a relatively simple process
+
+We also look at the CRISP-DM process - the cross-industry standard process for data mining
+
+![CRISP-DM](../Images/crisp_dm.png)
+
+It's really not that complex.
+
+1. Business Understanding
+2. Data Understanding
+3. Data Preparation
+4. Data Modelling
+5. Evaluation
+6. Deployment
+
+I really don't want to keep going since this is all stuff I've done before and the last part of this lesson is about data privacy, which we talk about more in week 7
+
 ## Lesson 3: Describing the Structure of Data
+
+### Inputs
+
+Let's talk about what data looks like before it goes in and what features to look out for. The main ones to talk about here are *concepts*, *instances* and *attributes*
+
+#### Concepts
+
+In data mining, whether we're looking to classify an instance, learn an association rule, derive a numerical result or find clusters, each of these is known as a *concept*. The exact value of this concept is known as the concept description.
+
+For example, if I wanted to determine whether a telecoms customer will churn, the concept to learn would be the target feature `churn` and its description would be a 1 or a 0.
+
+#### Instances
+
+Very simple. If every record in a dataset is comprised of attributes, an instance is a particular record with a given set of attributes. For example, a person may be defined with a set of attributes Age, Name, Height, Weight. An instance of a person would have a value for each of these attributes.
+
+#### Attributes
+
+Following from that, we need to define attributes. These are the features of instances that characterise them. Attributes can take values and each value is of a certain data type. Typically, these fall into either continuous (misnomer since it often includes intgers) or categorical. Each can be subdivided into nominal, ordinal, interval and ratio. Nominal data is as the *name* implies LOL - categories with no tangible, mathematical relationship to each other. One step up is ordinal. These have an order - things like hot > tepid > cold. However, while these have an intrinsic order, there is no indication to the distance between values. This is where interval comes in. These are discontinuous numerical values (integers, typically) that do have both order and magnitude. Last is the ratio (or continuous numerical). This is an infinitely large value space since it includes the infinitely many ratio values.
+
+Calling it there for this week. Short and sweet because it's already Thursday of week 2 lol

@@ -17,8 +17,15 @@
 ## Table of Contents
 
 1. [The Reasons we ask Questions of Data](#lesson-1-the-reasons-we-ask-questions-of-data)
+    1. [Research Questions](#research-questions)
+    2. [The Process of Generating a Question](#the-process-of-generating-a-question)
+    3. [What is Data Science?](#what-is-data-science)
+    4. [The History of Data](#the-history-of-data)
+    5. [The Structure of Data](#the-structure-of-data)
+    6. [The History of Data Analytics](#the-history-of-data-analytics)
 2. [The Data Science Process](#lesson-2-the-data-science-process)
 3. [Describing the Structure of Data](#lesson-3-describing-the-structure-of-data)
+    1. [Inputs](#inputs)
 
 ## Lesson 1: The Reasons we ask Questions of Data
 

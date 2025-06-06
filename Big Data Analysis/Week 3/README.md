@@ -47,17 +47,14 @@ Lawts and lawts of reading dude
     2. [A Quick Glossary](#a-quick-glossary)
     3. [Standard Data Science Tasks](#standard-data-science-tasks)
 3. [Linear Regression](#lesson-3-linear-regression)
-    1. []()
-    2. []()
-    3. []()
+    1. [Logistic Regression](#logistic-regression)
 4. [Decision Trees](#lesson-4-decision-trees)
-    1. []()
-    2. []()
-    3. []()
 5. [Evaluated Learning Models](#lesson-5-evaluated-learning-models)
-    1. []()
-    2. []()
-    3. []()
+    1. [Training and Testing](#training-and-testing)
+    2. [Confidence Intervals and Bernoulli Trials](#confidence-intervals-and-bernoulli-trials)
+    3. [Cross-Validation](#cross-validation)
+    4. [Mean Squared Error](#mean-squared-error-and-related-techniques)
+    5. [Extra Data Cleaning Methods](#extra-data-cleaning-methods-automated)
 
 ## Lesson 1: Basic Descriptive Statistics
 
@@ -323,4 +320,32 @@ z = norm.ppf(0.95)  # ~1.645
 
 ### Cross-Validation
 
+But what if you're unlucky? There are no four-leafed clovers in your back garden so you accidentally end up missing out an entire class of data that you're training your model to predict! The quick solution to this is to use a technique called stratification - where we choose a representative number of each class to comprise the training and test datasets. Great! However, this is pretty primitive and may not always prove useful to us.
 
+A more general method of mitigating this kind of bias is to repeat the holdout process. This is known as *repeated holdout*. You can use stratification with this and, essentially, you're finding an average of the error rates of these randomly sampled iterations of the training and test data.
+
+In a single holdout procedure, you might consider swapping the test and training datasets - train on test data and vice versa. However, this is only useful for a 50/50 split, which is not ideal. We can generalise this further, however, to use cross-validation.
+
+Cross validation, simply put, is partitioning the data into a fixed number of folds. Let's say we use 3 - the data are split into three equal partitions, where each is used in turn for testing, and the remainder for training (i.e. 1/3 for testing, 2/3 for training). Repeat the procedure with each partition being used once for testing and the error rates are averaged to yield the overall error rate.
+
+The standard is to use 10 folds for cross-validation. This is seen to have good performance, and is backed up by some theory. We also use stratification alongside this to improve things slightly.
+
+### Mean Squared Error and Related Techniques
+
+Error. How do we calculate it? Well, we have a number of good ways to do it with classification (accuracy, precision, recall, AUC-ROC, etc.) that we don't really cover for some reason. When it comes to numeric prediction (linear regression etc.), we have other measures.
+
+Here's a beautiful table of some ugly error measurements that you may consider. We'll go through a few to see what they're good for:
+
+![Performance Measures](../Images/error_measures.png)
+
+Mean-squared error is the most common. We see it used in standard linear regression because it is "very well-behaved" in the world of mathematics. Sometimes, MSE is rooted to make sure that the error is in the same order of magnitude as the values it represents. Compared to other measures, MSE tends to exaggerate the effects of outliers (since their values are squared). To combat this, we have mean absolute error. This is the average of the absolute difference where all sizes of error are treated equally.
+
+In cases where the size of the error is relevant, we use relative squared error. In the case of a 10% error, 50/500 and 0.2/2 are treated the same by mean absolute error. Relative squared error accounts for this error by including the squared difference between each term and the mean, too.
+
+### Extra Data Cleaning Methods (Automated!)
+
+For decision tree learning, the trees can be optimised - not in terms of performance, but in terms of space - by pruning. When a decision tree induction method prunes a subtree away, it applies a test that decides whether that subtree is justified by the data. This decision accepts a small sacrifice to training set accuracy in the belief that test set performance is improved. What this means is that some training instances are now incorrectly classified, where they would've been correctly classified otherwise. The solution? Get rid of them. We're now pruning the decision tree *as well as* the dataset itself. This technique assumes that the instances are not misclassified in a systematic way.
+
+Robust regression is a technique that uses a method that is less sensitive to outliers. Least-squares regression is affected by outliers so we can replace this error measurement with a robust version, like MAE or median least squares regression. Taking the median is really robust and can cope with outliers in both the X and Y directions. However, median is much more computationally difficult to calculate than the mean.
+
+Detecting anomalies is difficult. A consistent problem with automating anomaly detection is that the baby may be thrown out with the water so to speak. Since it is difficult to use a statistical model to find outliers, it often pays to use more than one. Using multiple different learning schemes (decision trees, nearest neighbours, logistic regression etc.) and *stacking* them (a type of ensemble learning) can allow us to filter out anomalies better since the models have to agree that an outlier is an outlier. One potential, but uncommon, problem with this is that the ensemble may be sacrificing instances of a particular class to improve accuracy against the other classes. Not great. Another issue is that some learning schemes are better suited than others. If a particularly good scheme is used with two not-so-great schemes, it may get outvoted, despite having a good fit for the data.

@@ -28,6 +28,7 @@
     1. [Multiple Linear Regression](#multiple-linear-regression)
     2. [Extending the Linear Model](#extending-the-linear-model)
     3. [Support Vector Machines](#support-vector-machines)
+    4. [Kernel Ridge Regression](#kernel-ridge-regression)
 2. [Alternative Techniques for Classification](#alternative-techniques-for-classification)
     1. []()
     2. []()
@@ -133,6 +134,8 @@ Since the concept of an MMH doesn't exist in regression, we need to find out whe
 
 The user defines a cutoff, $\epsilon$. The basic idea is to find a function that approximates training points by minimising error. The main difference is that all deviations up to $\epsilon$ are simply discarded. Overfitting risk is minimised by trying to maximise the flatness of the function. The error measure chosen for this is typically the absolute error instead of the squared error.
 
+![Epsilon in SVR](../Images/epsilon.png)
+
 The $\epsilon$ defines the radius of a tube around the regression function. For linear regression, this tube is a cylinder. If all training points are encapsulated by the tube of width $2\epsilon$, the SVM returns the function in the middle of the tube. The choice for the value of $\epsilon$ is nontrivial. As this value increases, more and more instances are included in the tube and the perceived error reaches zero. In the extreme case, if $2\epsilon$ exceeds the range of class values, the regression line is horizontal and the mean class value is predicted.
 
 When instances fall outside of the tube, they are called support vectors! These are then used to influence the flatness of the tube and almost act like sources of gravity, pulling the tube towards them. The aim of the SVM is to minimise prediction error, but also to maximise tube flatness. When support vectors are involved, the flatness decreases while error also decreases. An upper limit $C$ is placed to restrict the influence of each of the support vectors by limiting the value of $\alpha_i$ in the kernel equation:
@@ -143,6 +146,52 @@ In contrast to the classification implementation, $\alpha_i$ may be negative.
 
 #### Kernel Ridge Regression
 
+The slight problem with an SVM is that the kernel trick is really elegant, but not anywhere near as simple as the matrix operations we find in classic least-squares linear regression (because they're nonlinear, duh). Kernel Ridge Regression offers an alternative that combines the benefits of both.
+
+Kernel ridge regression doesn't use the user-defined $\epsilon$ that SVR does, which means that we can use the squared error instead of the absolute error like in linear regression. The neat trick here is to express a model's predicted class for a test instance as a weighted sum over the **dot products of each training instance** and the test instance, instead of a weighted sum of attribute values:
+
+$$\sum_{j=1}^n\alpha_j \text{a}_j\cdot \text{a}$$
+
+The overruling assumption here, however, is that the function goes through the origin (has no intercept value). The dot product here can be replaced by a kernel function to yield a nonlinear model, as with SVMs. The loss function that we use here is a little different, though.
+
+The sum of squared errors that we're used to is:
+
+$$\sum_{i=1}^n \bigg(y_i=\sum_{j=1}^n\alpha_j\text{a}_j\cdot\text{a}_i\bigg)^2$$
+
+For which the problem is that we're minimising error by choosing appropriate $\alpha_j$ values. Now, we have a coefficient for each training instance, rather than each attribute, leading to a serious case of overfitting!
+
+This is where the ridge comes in. We now trade closeness of fit (the normal error part) for model complexity by introducing a penalty:
+
+$$\sum_{i=1}^n \bigg(y_i=\sum_{j=1}^n\alpha_j\text{a}_j\cdot\text{a}_i\bigg)^2 + \lambda\sum_{i,j=1}^n\alpha_i\alpha_j\text{a}_j\cdot\text{a}_i$$
+
+Which effectively penalises large coefficients. The $\lambda$ term controls the tradeoff between complexity and model fit. Because the penalty is a simple summative term, it also has the added benefit of stabilising unstable cases (values close to zero, for example).
+
+This just means that no single instance has too large a coefficient placed on it unless it significantly reduces error.
+
+In comparison to standard linear regression, a KRR is simply unfeasible. The matrix operations are the most expensive, being an $O(n^3)$ operation. In the case of linear regression, the matrix is an $n\times n$ matrix of attributes. For KRR, it's an $m\times m$ matrix of *instances*. In a normal dataset, there will be far more instances than attributes, so this is only appropriate for nonlinear relationships or for small datasets.
+
 ## Alternative Techniques for Classification
+
+### Bayes Theorem
+
+$$P(A|B)=\frac{P(B|A)\times P(A)}{P(B)}$$
+
+This equation underpins what's known as Bayes Theorem. Essentially, it's a probabilistic equation that tells us what the probability of an event occurring, given that another event has already occurred is.
+
+Let's give an example. Let's say two factories (Factory 1 and Factory 2) produce bottles. F1 produces 240 bottles an hour and F2 produces 160 bottles an hour. Out of these 400 bottles an hour, let's say 10% are defective and that 50% of the defective bottles come from F1 and the other 50% from F2.
+
+If we look at all these bottles, and we know which factory each came from, what is the probability that I pick a defective bottle from F2?
+
+Let's reframe this mathematically:
+
+$$P(F1)=60\%\\ P(F2)=40\%\\ P(defect)=10\%\\ P(F1|defect)=50\%\\P(F2|defect)=50\%$$
+
+What we want to know (what's the probability of a bottle being defective, given that we know it's from F2?) can be written as:
+
+$$P(defect|F2)=\frac{P(F2|defect)\times P(defect)}{P(F2)}$$
+
+which we can calculate as $\frac{0.5\times 0.1}{0.4}=0.125$.
+
+So why is this useful? In classification, we use Bayes theorem as a foundation for the Naïve Bayes algorithm, which essentially looks through the training instances, finds out which characteristics made an instance a member of a class, and calculates the chances that a new instance falls into that class, given that we know attributes of the other members of the class.
 
 ## Choosing a Learning Technique

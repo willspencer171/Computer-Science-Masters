@@ -30,11 +30,11 @@
     3. [Support Vector Machines](#support-vector-machines)
     4. [Kernel Ridge Regression](#kernel-ridge-regression)
 2. [Alternative Techniques for Classification](#alternative-techniques-for-classification)
-    1. []()
-    2. []()
-    3. []()
+    1. [Bayes Theorem](#bayes-theorem)
+    2. [Naïve Bayes for Document Classification](#naïve-bayes-for-document-classification)
+    3. [Classification in Practice](#classification-in-practice)
 3. [Choosing a Learning Technique](#choosing-a-learning-technique)
-    1. []()
+    1. [Statistical Tests for Choosing a Learning Scheme](#statistical-tests-for-choosing-a-learning-scheme)
     2. []()
     3. []()
 
@@ -194,4 +194,144 @@ which we can calculate as $\frac{0.5\times 0.1}{0.4}=0.125$.
 
 So why is this useful? In classification, we use Bayes theorem as a foundation for the Naïve Bayes algorithm, which essentially looks through the training instances, finds out which characteristics made an instance a member of a class, and calculates the chances that a new instance falls into that class, given that we know attributes of the other members of the class.
 
+So, for the purposes of classification, we're determining the probability of a class based on the probability of each feature:
+
+$$P(class|features)\propto P(class) \cdot P(features|class)$$
+
+Now, we're looking at a proportionality here. This is because the way our probabilities are determined is dependent on the distribution function of the features. A Naïve Bayes classifier makes assumptions about the distribution of features. There are Gaussian (normal), multinomial and Bernoulli (binary) distributions for example.
+
+The Naïve Bayes classifier makes the assumption that your features are measured independently of each other. So, looking at this a bit more generally, we can hypothetically mix our data types but it's not exactly a great idea.
+
+Also, let's remember how we formulate the $P(features|class)$ term:
+
+$$P(features|class) = \prod_{i=1}^nP(feature_i|class)$$
+
+Naturally, we can see how this assumes that our features are measured independently.
+
+The problem we now come up against is that probabilities based on zero occurrences will equal zero. Obviously anything multiplied by zero is zero, no matter what other values were involved. Not good. We can either use a Laplace estimator to change zero probabilities to nonzero.
+
+The same problem doesn't occur when an attribute is *missing*. The likelihood is simply ignored, rather than zero.
+
+Ooh, while I'm here let's look at those probability functions!
+
+Gaussian is formidable but here it is:
+
+$$f(x)=\frac{1}{\sqrt{2\pi\sigma}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$$
+
+Which is to say that the probability density of a continuous variable taking a specific value can be calculated through this. Probability density? I thought we were finding the probability! Yes and no. The density is similar but not quite the same. It's more that this is the probability that a value falls within the range $x\pm\epsilon$. The probability is therefore $\epsilon\cdot f(x)=\frac{1}{\sqrt{2\pi\sigma}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$. This sounds like a drawback since you'd have to choose an epsilon value for every probability, but the way it all shakes out with normalisation is that you don't have to do this - the epsilons end up cancelling each other out.
+
+So now we have this probability distribution, we can use it in our calculations of the posterior probability
+
+### Naïve Bayes for Document Classification
+
+So, now that we've gone over Bayes Theorem and how probabilities are calculated, let's apply this to a classification problem: document classification.
+
+Let's say we have a news website. Each article fits into a category of some sort (world news, politics, sports, weather, etc.). Naïve Bayes as we laid out above is good at this sort of problem.
+
+We can look at a document as an instance where all of its attributes are the words that comprise it, as Boolean values - yes or no.
+
+This isn't particularly helpful when it comes to document classification, however, since words can appear more than once, and the frequency may be useful in determining what type of document it is. Now, we use a different version of the Naïve Bayes classification scheme - multinomial Naïve Bayes.
+
+Suppose $n_1, n_2, \dots, n_k$ is the number of times word $i$ appears in a document and $P_i$ is its corresponding probability. In multinomial Naïve Bayes, the distribution of words is assumed to follow a multinomial distribution (in the same way that the Gaussian Naïve Bayes followed normal distribution).
+
+There are two formulae for the multinomial Naïve Bayes classification scheme. First, I'll show the one from the textbook and the theory behind that.
+
+#### Exact Multinomial Probability
+
+The textbook describes a document as a bag of words - the frequency of words is important but the order they appear is not. $P_i$ is the probability of obtaining word $i$ when sampling from all documents in a hypothetical category $H$. For the multinomial distribution, the probability of a document (or event) $E$ given its class $H$ is:
+
+$$P(E\mid H)=N!\times\prod_{i=1}^k\frac{P_i^{n_i}}{n_i!}$$
+
+where $N$ is the total number of words in a document. Here, $P_i$ is estimated as the relative frequency of word $i$ in all training documents in class $H$.
+
+Typically, because, for large documents, the probabilities can become very small, underflow can occur. This problem is typically avoided by taking the logarithm of probabilities to stabilise the calculation.
+
+In practice, the factorials are not calculated because they are cancelled out in the normalisation process.
+
+#### Estimating the Probabilities
+
+Including all of these factorials and products can be computationally expensive, especially when taking the logarithm is computed at the end of it all. Usually, multinomial Naïve Bayes implements a different, less computationally expensive estimation of the probabilities of a word $P(w_i\mid C)$. We use Laplace smoothing.
+
+The decision rule is as follows:
+
+$$C=\argmax_C\bigg[\log P(C) + \sum_{i=1}^n x_i\log P(w_i\mid C)\bigg]$$
+
+Where the probability of a word given its class is estimated as:
+
+$$P(w_i\mid C)=\frac{N_{w_{i},C}+1}{\sum_j N_{w_{j}, C} + V}$$
+
+Where $N_{{w_i}, C}$ is the frequency of word $w_i$ in class $C$ and $V$ is the total number of words in the data
+
+What this aims to do is to replace any chance of a zero probability occurring. Let's say we have two classes - A and B. Our vocabulary consists of two words: "sunny" and "rainy". Our training data are
+
+```powershell
+Class A: ["sunny", "sunny", "rainy"]
+Class B: ["rainy", "rainy", "rainy"]
+```
+
+We know that, from training:
+
+```powershell
+Class A
+  P(sunny | A) = 2/3
+  P(rainy | A) = 1/3
+
+Class B
+  P(sunny | B) = 0/3
+  P(rainy | B) = 3/3
+```
+
+Let's say we have a test document ["sunny", "rainy"]. Let's compare the full multinomial probability with estimating using Laplace Smoothing.
+
+$$P(E\mid H) = N!\cdot\prod_{i=1}^k \frac{P_n^{n_i}}{n_i!}$$
+
+Substitute our test document:
+
+$$P(test | A) = 2!\cdot\bigg(2/3\cdot1/3\bigg) = 2\cdot\frac{2}{9} \approx 0.444\\P(test | B) = 2!\cdot\bigg(0\cdot 1\bigg) = 0$$
+
+And that's a zero probability! Not good! Compare with Laplace Smoothing:
+
+$$P(w_i\mid C)=\frac{N_{w_{i},C}+1}{\sum_j N_{w_{j}, C} + V}$$
+
+The probabilities of the words become
+
+```powershell
+Class A
+  sunny = 3/5
+  rainy = 2/5
+Class B
+  sunny = 1/5
+  rainy = 4/5
+```
+
+Plugging this in to our simplified Naïve Bayes
+
+$$P(E\mid H) = P(E) \prod P(w_i\mid E)^{n_i}$$
+
+Assuming uniform priors $P(A) = P(B)$
+
+$$P(A\mid ["sunny", "rainy"])=0.5\cdot \frac{3}{5}\cdot \frac{2}{5} = 0.12\\
+P(B\mid ["sunny", "rainy"])=0.5\cdot \frac{1}{5}\cdot \frac{4}{5}=0.08$$
+
+Looking at both, we can say that this document should be classified as class A, but the probabilities are different for each method.
+
+### Classification in Practice
+
+Have a look at [classification.py](classification.py) to take a look at how the support vector machine (described in lesson 1) compares with Naïve Bayes and the Decision Tree classifier which I should have covered last week :/ Confusion matrices are useful for determining the accuracy (and precision and recall) of classifiers. I've used both the iris and wine datasets to show these
+
 ## Choosing a Learning Technique
+
+How do we choose a technique for analysing our data? There's a simple three-step process for figuring this out.
+
+1. Identify qualitatively appropriate techniques
+    1. Which approaches make sense for the question at hand?
+2. Quantitative performance
+    1. Drawing on experience and prior knowledge to see which techniques are particularly useful for answering this question
+    2. The right tool for the right job
+    3. This considers the practical limitations of techniques - computational complexity, interpretability, outlier sensitivity etc.
+3. Empirical Testing
+    1. If all candidates seem appropriate, just start testing to see which performs the best and is most appropriate for your data in practice
+
+### Statistical tests for choosing a learning scheme
+
+T-tests are effective for showing if there is a significant difference between two models' performances. In fact, we're finding out if there is a significant difference between the residuals of our models

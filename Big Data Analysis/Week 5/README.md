@@ -28,13 +28,13 @@ Chapter 6, pp. 111-121 of Lemahieu's Principles of Data Management
     1. [Files vs DBMS](#files-vs-dbms)
     2. [Elements of a DBMS](#elements-of-a-dbms)
 2. [Modelling Data and the Relational Database Model](#modelling-data-and-the-relational-database-model)
-    1. []()
-    2. []()
-    3. []()
-3. [Database Normalisation]()
-    1. []()
-    2. []()
-    3. []()
+    1. [The Entity Relationship Diagram](#the-entity-relationship-diagram-erd)
+    2. [The Enhanced ERD](#the-enhanced-erd-eer)
+    3. [UML Class Diagram](#the-uml-class-diagram)
+    4. [The Relational Model](#relational-model)
+3. [Database Normalisation](#database-normalisation)
+    1. [Why We Need Normalisation](#why-we-need-normalisation)
+    2. [Normal Forms](#normal-forms)
 
 ## Why Databases?
 
@@ -294,6 +294,8 @@ Let's say we change the room in the first row from H221 to B007. Seemingly innoc
 Next, a deletion anomaly. Remove the second row and you'll find that you no longer have any information about the class HCI101b. That's it, that course doesn't exist now!
 
 Finally an insertion anomaly. Let's say we want to create a new course but nobody has signed on yet. You can fill in all the relevant information for the course, yet it still wouldn't be valid since no student has signed on to it, thus failing to create a composite key.
+
+### Normal Forms
 
 #### First Normal Form
 

@@ -35,9 +35,8 @@ Seciont 12.3 of Ricardo and Urban's *Databases Illuminated*
     1. [Document Databases](#document-databases-json)
     2. [Graph Databases](#graph-databases)
 3. [Big Data, Hadoop and Distributed Computation](#big-data-hadoop-and-distributed-computing)
-    1. []()
-    2. []()
-    3. []()
+    1. [Hadoop](#hadoop)
+    2. [Pros and Cons of Hadoop](#pros-and-cons-of-hadoop)
 
 ## Constructing and Querying a Database
 
@@ -242,3 +241,66 @@ When it comes to defining Big Data, it's more or less about what typical systems
   - These are linked to data quality and integrity
 - Value
   - Data has intrinsic value but it is of no use if it remains undiscovered.
+
+Big Data comes loaded with a few extra definitions. With the main three Vs above (Volume, Velocity and Variety) come new data models, new methods of analysing streamed data and new infrastructure for storage and processing. Much of this means that big data is difficult to actually deal with as an individual - it moves beyond the capabilities of a single workhorse and requires dedicated infrastructure for storage and distribution of processing power.
+
+At the end of the day, Big Data is the gas that fuels the infrastructure used to refine, analyse, store, visualise and process it.
+
+### Hadoop
+
+Apache Hadoop is a big data processing framework, written in Java. In short, it excels in batch processing and large-scale data storage by using the HDFS (Hadoop Distributed File System) to distribute storage over a cluster of machines.
+
+![Hadoop Architecture](/Images/hadoop.png)
+
+#### HDFS - Storage
+
+When you have large volumes of data, you need to consider where it'll all go. Data storage is relatively inexpensive compared with computing power, but a single machine won't handle petabytes of data.
+
+Storage is therefore distributed across multiple machines and stored in the Hadoop Distributed File System.
+
+HDFS splits your file into blocks of equal size. Each block is stored on a separate node (machine) in the cluster. Each block is replicated across all the nodes. Effectively, your file is stored in chunks, copied onto other machines for fault tolerance - if one node goes down, you have copies elsewhere. The data for your file is managed by a Name Node - a master server. This presents your data to you as a single file, when in reality it represents the copies of the file, split into blocks.
+
+Using blocks to manage your data lays the groundwork for parallel processing - you can perform MapReduce on multiple machines and return the results. If your data is shared across 5 machines, processing effectively takes 20% of the time.
+
+Below is the default behaviour of Hadoop for storing data across nodes, organised into racks:
+
+![HDFS](/Images/HDFS.png)
+
+Your dataset is divided into three blocks. The first replica of each block is placed on a node in a random rack (a rack being a collection of nodes on the same network switch). The second is placed in another rack on a random node, and the third is placed in the same rack as the second, on another node.
+
+If the first node fails, it's assumed that the rack itself failed and the next node is accessed from the next rack. If this fails, it's unlikely that two complete racks have failed, so the third block is fetched from another node in that rack.
+
+#### MapReduce - Processing
+
+Two phases of operation occur here. The Map phase and the Reduce phase. The map phase breaks the data into chunks and the reduce phase is used to aggregate the results using a function.
+
+![MapReduce Example](/Images/mapred.png)
+
+#### YARN - Resource Management
+
+I'm not going to go into detail about how exactly this works, but it just manages the reources that the cluster has available to it. In the case that you have a large team of people, resources are allocated fairly and different apps running on Hadoop like Spark or Hive also get allocated resources.
+
+Hive is a data warehousing system that aims to emulate SQL but for big data - we can use HiveQL to query our big database!
+
+#### Hybrid Approach
+
+![Hybrid](/Images/hybrid_hadoop.png)
+
+### Pros and Cons of Hadoop
+
+Hadoop is really good at what it does:
+
+- High Variety
+- High Volume
+- Cost effective
+- Fault tolerant
+- Parallelism
+
+But it is not so good for other things:
+
+- Real-time processing
+  - Large datasets running on batch storage
+  - Can lead to huge runtimes of hours or days
+- Not transactional
+- Complex data
+  - If you have data that would be best represented as a graph, Hadoop is not necessarily the best way of going about it.
